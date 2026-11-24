@@ -5,6 +5,7 @@ import { LanguageToggle } from "@/components/language-toggle";
 import { MobileUserMenu } from "@/components/user-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Toaster } from "@/components/toaster";
+import { SupportCard } from "@/components/support-link";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 
@@ -26,6 +27,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {t.appName}
         </Link>
         <SidebarNav />
+        <div className="mt-auto pt-4">
+          <SupportCard />
+        </div>
       </aside>
 
       <div className="min-w-0 flex-1">

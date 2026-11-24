@@ -171,6 +171,12 @@ const en = {
     recent: "Recent transactions",
     getStarted: "Start by adding where your money is kept: bank, e-wallet, ASB, gold…",
   },
+  support: {
+    title: "Support the developer",
+    short: "Support KiraDuit",
+    body: "KiraDuit is free. If it helps you, you can support its development.",
+    cta: "Support on Sociabuzz",
+  },
   onboarding: {
     title: "Get started",
     subtitle: "Three quick steps to set up your tracker.",
@@ -428,6 +434,12 @@ const ms: Dictionary = {
     net: "Baki bersih",
     recent: "Transaksi terkini",
     getStarted: "Mula dengan tambah di mana duit anda disimpan: bank, e-dompet, ASB, emas…",
+  },
+  support: {
+    title: "Sokong pembangun",
+    short: "Sokong KiraDuit",
+    body: "KiraDuit percuma. Jika ia membantu anda, anda boleh menyokong pembangunannya.",
+    cta: "Sokong di Sociabuzz",
   },
   onboarding: {
     title: "Mula di sini",

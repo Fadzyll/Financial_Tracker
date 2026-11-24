@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { LogOut, Settings } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 import { useI18n } from "@/lib/i18n/client";
+import { SupportMenuItem } from "@/components/support-link";
 
 function initials(name: string, email: string) {
   const source = name.trim() || email;
@@ -101,6 +102,8 @@ export function MobileUserMenu({ name, email }: { name: string; email: string })
           >
             <Settings className="size-5 text-muted" /> {t.nav.settings}
           </Link>
+          <SupportMenuItem />
+          <div className="my-1 border-t border-border" />
           <SignOutButton />
         </div>
       )}

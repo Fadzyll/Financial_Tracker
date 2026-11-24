@@ -1,10 +1,11 @@
-import { Download, Languages, LogOut, ShieldCheck, Tags, UserRound, X } from "lucide-react";
+import { Download, Heart, Languages, LogOut, ShieldCheck, Tags, UserRound, X } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 import { buttonClass } from "@/components/button-class";
 import { LanguageToggle } from "@/components/language-toggle";
 import { PageHeader } from "@/components/page-header";
 import { Card, SubmitButton } from "@/components/ui";
 import { Avatar } from "@/components/user-menu";
+import { SupportButton } from "@/components/support-link";
 import { getCategories } from "@/lib/data";
 import { getI18n } from "@/lib/i18n/server";
 import { categoryLabel } from "@/lib/labels";
@@ -109,6 +110,10 @@ export default async function SettingsPage() {
         <div className="border-t border-border pt-4">
           <AddCategoryForm />
         </div>
+      </Section>
+
+      <Section icon={Heart} title={t.support.title} hint={t.support.body}>
+        <SupportButton />
       </Section>
 
       <Section icon={ShieldCheck} title={t.settings.yourData} hint={t.settings.yourDataHint}>
