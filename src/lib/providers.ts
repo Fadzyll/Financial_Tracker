@@ -101,6 +101,17 @@ export const PROVIDERS: Provider[] = [
   { id: "prs", name: "PRS (Private Retirement Scheme)", short: "PRS", group: "retirement", type: "retirement", color: "#4B5563", aliases: ["persaraan swasta"] },
 ];
 
+/** Which provider groups make sense for each account type. */
+export const GROUPS_FOR_TYPE: Record<AccountType, ProviderGroup[]> = {
+  bank: ["bank", "digital"],
+  ewallet: ["ewallet"],
+  cash: [],
+  investment: ["investment"],
+  gold: ["gold"],
+  retirement: ["retirement"],
+  other: PROVIDER_GROUPS,
+};
+
 const BY_ID = new Map(PROVIDERS.map((p) => [p.id, p]));
 
 export function getProvider(id: string | null | undefined): Provider | undefined {

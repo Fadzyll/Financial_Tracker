@@ -7,7 +7,7 @@ import { Check, ChevronDown, PencilLine, Search, X } from "lucide-react";
 import { ProviderLogo } from "@/components/provider-logo";
 import { noAutofill } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/client";
-import { PROVIDER_GROUPS, getProvider, searchProviders, type Provider } from "@/lib/providers";
+import { PROVIDER_GROUPS, getProvider, searchProviders, type Provider, type ProviderGroup } from "@/lib/providers";
 
 export const OTHER = "other";
 
@@ -19,10 +19,13 @@ export function ProviderPicker({
   value,
   onChange,
   id,
+  groups = PROVIDER_GROUPS,
 }: {
   value: string;
   onChange: (value: string, provider?: Provider) => void;
   id?: string;
+  /** Only show providers from these groups (e.g. banks for a Bank account) */
+  groups?: ProviderGroup[];
 }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
@@ -30,7 +33,10 @@ export function ProviderPicker({
   const searchRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const selected = getProvider(value);
-  const results = useMemo(() => searchProviders(query), [query]);
+  const results = useMemo(
+    () => searchProviders(query).filter((p) => groups.includes(p.group)),
+    [query, groups],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -121,7 +127,7 @@ export function ProviderPicker({
               </div>
 
               <div className="flex-1 overflow-y-auto overscroll-contain p-2">
-                {PROVIDER_GROUPS.map((group) => {
+                {groups.map((group) => {
                   const items = results.filter((p) => p.group === group);
                   if (items.length === 0) return null;
                   return (

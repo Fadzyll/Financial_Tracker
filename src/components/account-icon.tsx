@@ -4,7 +4,7 @@ import type { AccountType } from "@/lib/types";
 import { getProvider } from "@/lib/providers";
 import { ProviderLogo } from "@/components/provider-logo";
 
-const ICONS: Record<AccountType, typeof Wallet> = {
+export const ACCOUNT_TYPE_ICONS: Record<AccountType, typeof Wallet> = {
   bank: Landmark,
   ewallet: Smartphone,
   cash: Banknote,
@@ -26,7 +26,7 @@ export function AccountIcon({
 }) {
   const known = getProvider(provider);
   if (known) return <ProviderLogo provider={known} className={className} />;
-  const Icon = ICONS[type] ?? Wallet;
+  const Icon = ACCOUNT_TYPE_ICONS[type] ?? Wallet;
   return (
     <span
       className={clsx(
