@@ -97,6 +97,11 @@ export function AuthForm({
           htmlFor="password"
           hint={mode === "signup" ? t.auth.passwordHint : undefined}
         >
+          {mode === "login" && (
+            <Link href="/forgot-password" className="float-right -mt-7 text-xs font-semibold text-brand">
+              {t.auth.forgotLink}
+            </Link>
+          )}
           <PasswordInput
             id="password"
             name="password"

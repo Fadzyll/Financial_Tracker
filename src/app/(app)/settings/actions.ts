@@ -43,3 +43,22 @@ export async function deleteCategory(id: string) {
   if (!error) await flash("categoryDeleted");
   revalidatePath("/", "layout");
 }
+
+/** Change password: confirm the current one first, then set the new one. */
+export async function changePassword(_: FormState, formData: FormData): Promise<FormState & { ok?: boolean }> {
+  const { supabase, email } = await requireUser();
+  const { t } = await getI18n();
+  const current = String(formData.get("current") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password.length < 8) return { fieldErrors: { password: t.auth.passwordTooShort } };
+  if (password !== confirm) return { fieldErrors: { confirm: t.auth.passwordsDontMatch } };
+
+  const { error: wrong } = await supabase.auth.signInWithPassword({ email, password: current });
+  if (wrong) return { fieldErrors: { current: t.auth.wrongCurrentPassword } };
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.code === "same_password" ? t.auth.samePassword : dbErrorMessage(error, t, "changePassword") };
+  await flash("passwordChanged");
+  return { ok: true };
+}

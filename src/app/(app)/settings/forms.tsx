@@ -2,10 +2,10 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { Check } from "lucide-react";
-import { Field, FormError, Input, Select, SubmitButton, noAutofill } from "@/components/ui";
+import { Field, FormError, Input, PasswordInput, Select, SubmitButton, noAutofill } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/client";
 import type { FormState } from "@/lib/validation";
-import { addCategory, updateProfile } from "./actions";
+import { addCategory, changePassword, updateProfile } from "./actions";
 
 export function ProfileForm({ displayName }: { displayName: string }) {
   const { t } = useI18n();
@@ -55,6 +55,31 @@ export function AddCategoryForm() {
         <SubmitButton variant="secondary">{t.settings.addCategory}</SubmitButton>
       </div>
       {state.fieldErrors?.name && <p className="text-xs font-medium text-danger">{state.fieldErrors.name}</p>}
+    </form>
+  );
+}
+
+export function ChangePasswordForm() {
+  const { t } = useI18n();
+  const [state, action] = useActionState<FormState & { ok?: boolean }, FormData>(changePassword, {});
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (state.ok) formRef.current?.reset();
+  }, [state]);
+  const fe = state.fieldErrors ?? {};
+  return (
+    <form ref={formRef} action={action} className="space-y-3">
+      <FormError message={state.error} />
+      <Field label={t.auth.currentPassword} htmlFor="current" error={fe.current}>
+        <PasswordInput id="current" name="current" autoComplete="current-password" required />
+      </Field>
+      <Field label={t.auth.newPassword} htmlFor="new_password" error={fe.password}>
+        <PasswordInput id="new_password" name="password" autoComplete="new-password" minLength={8} required />
+      </Field>
+      <Field label={t.auth.confirmPassword} htmlFor="confirm_password" error={fe.confirm}>
+        <PasswordInput id="confirm_password" name="confirm" autoComplete="new-password" minLength={8} required />
+      </Field>
+      <SubmitButton variant="secondary">{t.auth.changePassword}</SubmitButton>
     </form>
   );
 }

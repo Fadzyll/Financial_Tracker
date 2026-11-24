@@ -1,4 +1,4 @@
-import { Download, Heart, Languages, LogOut, ShieldCheck, Tags, UserRound, X } from "lucide-react";
+import { Download, Heart, KeyRound, Languages, LogOut, ShieldCheck, Tags, UserRound, X } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 import { buttonClass } from "@/components/button-class";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -11,7 +11,7 @@ import { getI18n } from "@/lib/i18n/server";
 import { categoryLabel } from "@/lib/labels";
 import { requireUser } from "@/lib/supabase/server";
 import { deleteCategory } from "./actions";
-import { AddCategoryForm, ProfileForm } from "./forms";
+import { AddCategoryForm, ChangePasswordForm, ProfileForm } from "./forms";
 
 function Section({
   icon: Icon,
@@ -72,6 +72,10 @@ export default async function SettingsPage() {
 
       <Section icon={UserRound} title={t.settings.profile} hint={t.settings.profileHint}>
         <ProfileForm displayName={name} />
+      </Section>
+
+      <Section icon={KeyRound} title={t.auth.changePassword} hint={t.auth.changePasswordHint}>
+        <ChangePasswordForm />
       </Section>
 
       <Section icon={Languages} title={t.common.language} hint={t.settings.languageHint}>

@@ -18,7 +18,8 @@ export type FlashKey =
   | "goalDeleted"
   | "categoryAdded"
   | "categoryDeleted"
-  | "profileSaved";
+  | "profileSaved"
+  | "passwordChanged";
 
 /** Queue a one-off success message; the <Toaster> shows it on the next screen. */
 export async function flash(key: FlashKey, action?: { href: string }) {
