@@ -3,7 +3,7 @@ import { SECRET_KEY, adminFetch, logIn, signUp, uniqueEmail } from "./helpers";
 
 test("sign up lands on the dashboard; logged-out pages redirect to login", async ({ page, browser }) => {
   await signUp(page, { name: "Hakimi" });
-  await expect(page.getByText("Hi, Hakimi")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Hi, Hakimi" })).toBeVisible();
 
   const guest = await (await browser.newContext()).newPage();
   await guest.goto("/dashboard");
@@ -49,6 +49,8 @@ test("change password in Settings checks the current password", async ({ page, b
 test("forgot password gives the same answer for unknown emails", async ({ page }) => {
   await page.goto("/login");
   await page.getByRole("link", { name: "Forgot password?" }).click();
+  await page.waitForURL("**/forgot-password");
+  await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
   await page.getByLabel("Email").fill(uniqueEmail("nobody"));
   await page.getByRole("button", { name: "Send reset link" }).click();
   await expect(page.getByText(/If an account exists/)).toBeVisible();
@@ -98,6 +100,7 @@ test("confirmation link opened in another browser says the email is confirmed", 
 test("privacy page is public and linked from login", async ({ page }) => {
   await page.goto("/login");
   await page.getByRole("link", { name: "Privacy" }).click();
+  await page.waitForURL("**/privacy");
   await expect(page.getByRole("heading", { name: "Privacy policy" })).toBeVisible();
   await expect(page.getByText("What we never store")).toBeVisible();
 });

@@ -97,11 +97,7 @@ export function AuthForm({
           htmlFor="password"
           hint={mode === "signup" ? t.auth.passwordHint : undefined}
         >
-          {mode === "login" && (
-            <Link href="/forgot-password" className="float-right -mt-7 text-xs font-semibold text-brand">
-              {t.auth.forgotLink}
-            </Link>
-          )}
+
           <PasswordInput
             id="password"
             name="password"
@@ -110,6 +106,13 @@ export function AuthForm({
             required
           />
         </Field>
+        {mode === "login" && (
+          <div className="-mt-2 text-right">
+            <Link href="/forgot-password" className="inline-block py-1 text-sm font-semibold text-brand">
+              {t.auth.forgotLink}
+            </Link>
+          </div>
+        )}
         <SubmitButton className="w-full">{mode === "login" ? t.auth.login : t.auth.signup}</SubmitButton>
       </form>
       <p className="mt-5 text-center text-sm text-muted">
