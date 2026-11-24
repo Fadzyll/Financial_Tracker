@@ -4,8 +4,8 @@ export const DEFAULT_LOCALE: Locale = "en";
 export const LOCALE_COOKIE = "locale";
 
 const en = {
-  appName: "Financial Tracker",
-  appTagline: "Track your money in, money out and savings goals.",
+  appName: "KiraDuit",
+  appTagline: "Count your money in, money out, and what's left.",
   nav: {
     dashboard: "Dashboard",
     accounts: "Accounts",
@@ -262,8 +262,8 @@ const en = {
 export type Dictionary = typeof en;
 
 const ms: Dictionary = {
-  appName: "Penjejak Kewangan",
-  appTagline: "Jejak duit masuk, duit keluar dan sasaran simpanan anda.",
+  appName: "KiraDuit",
+  appTagline: "Kira duit masuk, duit keluar, dan berapa lagi tinggal.",
   nav: {
     dashboard: "Utama",
     accounts: "Akaun",

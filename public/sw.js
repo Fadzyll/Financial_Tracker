@@ -1,10 +1,10 @@
-// Financial Tracker service worker.
+// KiraDuit service worker.
 //
 // Privacy: pages contain personal financial data, so HTML pages and API
 // responses are NEVER cached. Only hashed static build files (JS/CSS/fonts)
 // and icons are cached. When offline, navigations show /offline.html.
 
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `static-${VERSION}`;
 const PRECACHE = ["/offline.html", "/icons/icon-192.png", "/icons/icon.svg"];
 

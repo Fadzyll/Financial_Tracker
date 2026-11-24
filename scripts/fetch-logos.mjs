@@ -18,7 +18,7 @@ const domains = JSON.parse(await readFile(new URL("scripts/provider-domains.json
 const mapFile = new URL("src/lib/provider-logos.json", root);
 const logos = JSON.parse(await readFile(mapFile, "utf8").catch(() => "{}"));
 const force = process.argv.includes("--force");
-const UA = "Mozilla/5.0 (compatible; FinancialTrackerLogoFetcher/1.0)";
+const UA = "Mozilla/5.0 (compatible; KiraDuitLogoFetcher/1.0)";
 const OK_TYPES = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
 const MIN_BYTES = 600; // smaller than this is usually a 16px favicon
 const MIN_PX = 64; // smaller icons look blurry; keep the coloured badge instead

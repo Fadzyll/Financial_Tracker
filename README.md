@@ -1,4 +1,6 @@
-# Financial Tracker
+# KiraDuit
+
+*Kira duit masuk, duit keluar, dan berapa lagi tinggal.* — count your money in, money out, and what's left.
 
 A personal money tracker (PWA) where you record your own **money in**, **money out** and **transfers**, see your **total savings** across banks, e-wallets and investments (ASB, gold, EPF…), and track **savings goals** (wedding, kids, travel…).
 
