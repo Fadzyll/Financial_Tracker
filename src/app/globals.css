@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
-/* Design tokens — light by default, dark follows the device setting. */
+/*
+ * Design tokens.
+ * - No choice saved: follow the device setting (prefers-color-scheme).
+ * - Choice saved: <html data-theme="light|dark"> wins (set from a cookie).
+ */
 :root {
   --bg: #f6f7f9;
   --surface: #ffffff;
@@ -16,10 +20,20 @@
   --expense: #b91c1c;
   --danger: #b91c1c;
   --danger-soft: #fee2e2;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #6250d6;
+  --grid: #e9ebef;
+  --axis: #c9cdd4;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0b0f14;
     --surface: #131922;
     --surface-2: #1b2330;
@@ -34,8 +48,54 @@
     --expense: #f87171;
     --danger: #f87171;
     --danger-soft: #3b1515;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-6: #0ca30c;
+    --series-7: #9085e9;
+    --grid: #222a36;
+    --axis: #364152;
+    color-scheme: dark;
   }
 }
+
+:root[data-theme="dark"] {
+  --bg: #0b0f14;
+  --surface: #131922;
+  --surface-2: #1b2330;
+  --border: #273141;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --brand: #34d399;
+  --brand-strong: #6ee7b7;
+  --brand-soft: #064e3b;
+  --on-brand: #04231a;
+  --income: #34d399;
+  --expense: #f87171;
+  --danger: #f87171;
+  --danger-soft: #3b1515;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #0ca30c;
+  --series-7: #9085e9;
+  --grid: #222a36;
+  --axis: #364152;
+  color-scheme: dark;
+}
+
+/* Theme toggle icon: show the sun in dark mode (tap → light), moon in light. */
+.theme-icon-sun { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-icon-sun { display: inline; }
+  :root:not([data-theme="light"]) .theme-icon-moon { display: none; }
+}
+:root[data-theme="dark"] .theme-icon-sun { display: inline; }
+:root[data-theme="dark"] .theme-icon-moon { display: none; }
 
 @theme inline {
   --color-bg: var(--bg);
@@ -52,6 +112,15 @@
   --color-expense: var(--expense);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+  --color-series-4: var(--series-4);
+  --color-series-5: var(--series-5);
+  --color-series-6: var(--series-6);
+  --color-series-7: var(--series-7);
+  --color-grid: var(--grid);
+  --color-axis: var(--axis);
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -66,4 +135,16 @@ body {
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+@keyframes fade-in {
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

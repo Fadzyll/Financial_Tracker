@@ -1,8 +1,9 @@
 import { PageHeader } from "@/components/page-header";
 import { ButtonLink, Card } from "@/components/ui";
 import { getAccounts, getCategories } from "@/lib/data";
-import { todayISO } from "@/lib/dates";
+import { todayISO, yesterdayISO } from "@/lib/dates";
 import { getI18n } from "@/lib/i18n/server";
+import { safeNextPath } from "@/lib/next-path";
 import type { TransactionKind } from "@/lib/types";
 import { isUuid } from "@/lib/validation";
 import { createTransaction } from "../actions";
@@ -11,14 +12,16 @@ import { TransactionForm } from "../transaction-form";
 export default async function NewTransactionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ kind?: string; account?: string }>;
+  searchParams: Promise<{ kind?: string; account?: string; from?: string }>;
 }) {
   const { t } = await getI18n();
   const sp = await searchParams;
   const [accounts, categories] = await Promise.all([getAccounts(), getCategories()]);
-  const kind: TransactionKind = sp.kind === "income" || sp.kind === "transfer" ? sp.kind : "expense";
+  const explicitKind = sp.kind === "income" || sp.kind === "transfer" || sp.kind === "expense";
+  const kind: TransactionKind = explicitKind ? (sp.kind as TransactionKind) : "expense";
   const accountId = isUuid(sp.account) ? sp.account : undefined;
-  const backHref = accountId ? `/accounts/${accountId}` : "/transactions";
+  // Go back to where the user came from after saving / cancelling.
+  const backHref = accountId ? `/accounts/${accountId}` : safeNextPath(sp.from);
 
   return (
     <>
@@ -35,9 +38,11 @@ export default async function NewTransactionPage({
           action={createTransaction}
           accounts={accounts}
           categories={categories}
-          defaults={{ kind, accountId, date: todayISO() }}
+          defaults={{ kind, accountId, date: todayISO(), explicit: explicitKind || Boolean(accountId) }}
           cancelHref={backHref}
-          next={accountId ? `/accounts/${accountId}` : undefined}
+          next={backHref}
+          today={todayISO()}
+          yesterday={yesterdayISO()}
         />
       )}
     </>

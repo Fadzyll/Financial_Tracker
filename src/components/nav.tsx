@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowLeftRight, Home, Plus, Settings, Target, Wallet } from "lucide-react";
 import { useI18n } from "@/lib/i18n/client";
+import { SignOutButton } from "@/components/user-menu";
 
 function useItems() {
   const { t } = useI18n();
@@ -28,7 +29,7 @@ export function SidebarNav() {
   return (
     <nav className="flex flex-col gap-1">
       <Link
-        href="/transactions/new"
+        href={`/transactions/new?from=${encodeURIComponent(pathname)}`}
         className="mb-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-4 text-sm font-semibold text-on-brand hover:bg-brand-strong"
       >
         <Plus className="size-4" /> {t.transactions.add}
@@ -48,6 +49,7 @@ export function SidebarNav() {
           <Icon className="size-5" /> {label}
         </Link>
       ))}
+      <SignOutButton />
     </nav>
   );
 }
@@ -77,7 +79,7 @@ export function BottomNav() {
         {tab(accounts)}
         <div className="flex flex-1 items-center justify-center">
           <Link
-            href="/transactions/new"
+            href={`/transactions/new?from=${encodeURIComponent(pathname)}`}
             aria-label={t.transactions.add}
             className="-mt-6 inline-flex size-14 items-center justify-center rounded-full bg-brand text-on-brand shadow-lg ring-4 ring-bg"
           >

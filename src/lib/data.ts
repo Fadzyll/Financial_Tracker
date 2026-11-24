@@ -4,12 +4,20 @@ import type { AccountWithBalance, Category, Goal, Transaction } from "@/lib/type
 import { monthRange } from "@/lib/dates";
 import { isUuid } from "@/lib/validation";
 
+/** Supabase returns plain error objects; wrap them so Vercel logs show what failed. */
+function fail(where: string, error: { message: string; code?: string; hint?: string | null }): never {
+  const hint = error.code === "42P01" || error.code === "PGRST205"
+    ? " — the database tables are missing. Run supabase/migrations/*.sql in the Supabase SQL Editor."
+    : "";
+  throw new Error(`[${where}] ${error.message}${error.code ? ` (code ${error.code})` : ""}${hint}`);
+}
+
 export async function getAccounts({ includeArchived = false } = {}) {
   const { supabase } = await requireUser();
   let query = supabase.from("account_balances").select("*").order("archived").order("created_at");
   if (!includeArchived) query = query.eq("archived", false);
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) fail("getAccounts", error);
   return (data ?? []) as AccountWithBalance[];
 }
 
@@ -20,7 +28,7 @@ export async function getCategories() {
     .select("id, key, name, kind")
     .order("kind")
     .order("created_at");
-  if (error) throw error;
+  if (error) fail("getCategories", error);
   return (data ?? []) as Category[];
 }
 
@@ -31,14 +39,23 @@ export async function getGoals() {
     .select("*, goal_accounts(account_id)")
     .eq("archived", false)
     .order("created_at");
-  if (error) throw error;
+  if (error) fail("getGoals", error);
   return (data ?? []) as Goal[];
+}
+
+/** Make free text safe to embed in a PostgREST filter. */
+export function cleanSearch(q: unknown) {
+  return typeof q === "string" ? q.replace(/[%_,()*\\:"'.]/g, " ").replace(/\s+/g, " ").trim().slice(0, 50) : "";
 }
 
 export async function getTransactions(opts: {
   month?: string;
   accountId?: string;
   limit?: number;
+  /** Already cleaned with cleanSearch() */
+  search?: string;
+  /** Categories whose name matches the search */
+  searchCategoryIds?: string[];
 }) {
   const { supabase } = await requireUser();
   let query = supabase
@@ -53,14 +70,20 @@ export async function getTransactions(opts: {
   if (opts.accountId && isUuid(opts.accountId)) {
     query = query.or(`account_id.eq.${opts.accountId},to_account_id.eq.${opts.accountId}`);
   }
+  if (opts.search) {
+    const ids = (opts.searchCategoryIds ?? []).filter(isUuid);
+    query = ids.length
+      ? query.or(`note.ilike.%${opts.search}%,category_id.in.(${ids.join(",")})`)
+      : query.ilike("note", `%${opts.search}%`);
+  }
   if (opts.limit) query = query.limit(opts.limit);
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) fail("getTransactions", error);
   return (data ?? []) as Transaction[];
 }
 
 /** Money in / out for a month. Transfers and value updates are not counted. */
-export function summarize(transactions: Transaction[]) {
+export function summarize(transactions: Pick<Transaction, "kind" | "amount">[]) {
   let income = 0;
   let expense = 0;
   for (const tx of transactions) {
@@ -83,4 +106,19 @@ export async function getTransaction(id: string) {
   const { supabase } = await requireUser();
   const { data } = await supabase.from("transactions").select("*").eq("id", id).maybeSingle();
   return (data ?? null) as Transaction | null;
+}
+
+/** Every transaction (only the columns the charts need), oldest first. */
+export async function getTransactionHistory() {
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("kind, amount, occurred_on, account_id, to_account_id, category_id")
+    .order("occurred_on")
+    .limit(20000);
+  if (error) fail("getTransactionHistory", error);
+  return (data ?? []) as Pick<
+    Transaction,
+    "kind" | "amount" | "occurred_on" | "account_id" | "to_account_id" | "category_id"
+  >[];
 }

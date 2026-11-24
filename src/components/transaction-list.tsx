@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, RefreshCw } from "lucide-react";
 import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
 import { categoryLabel } from "@/lib/labels";
-import { formatDate } from "@/lib/dates";
+import { formatDate, todayISO, yesterdayISO } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
 import type { AccountWithBalance, Category, Transaction, TransactionKind } from "@/lib/types";
 
@@ -40,7 +40,10 @@ export function TransactionList({
   locale,
   accountId,
   emptyText,
+  from,
 }: {
+  /** Page to return to after editing a transaction */
+  from?: string;
   transactions: Transaction[];
   accounts: AccountWithBalance[];
   categories: Category[];
@@ -58,6 +61,8 @@ export function TransactionList({
   }
 
   const accountName = new Map(accounts.map((a) => [a.id, a.name]));
+  const today = todayISO();
+  const yesterday = yesterdayISO();
   const categoryById = new Map(categories.map((c) => [c.id, c]));
 
   const groups: { date: string; items: Transaction[] }[] = [];
@@ -72,7 +77,11 @@ export function TransactionList({
       {groups.map((group) => (
         <section key={group.date}>
           <h3 className="mb-1.5 px-1 text-xs font-semibold tracking-wide text-muted uppercase">
-            {formatDate(group.date, locale)}
+            {group.date === today
+              ? `${t.transactions.today} · ${formatDate(group.date, locale)}`
+              : group.date === yesterday
+                ? `${t.transactions.yesterday} · ${formatDate(group.date, locale)}`
+                : formatDate(group.date, locale)}
           </h3>
           <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface">
             {group.items.map((tx) => {
@@ -92,7 +101,7 @@ export function TransactionList({
               return (
                 <li key={tx.id}>
                   <Link
-                    href={`/transactions/${tx.id}/edit`}
+                    href={`/transactions/${tx.id}/edit${from ? `?from=${encodeURIComponent(from)}` : ""}`}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-surface-2"
                   >
                     <span

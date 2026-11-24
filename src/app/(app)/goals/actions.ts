@@ -4,13 +4,15 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
+import { dbErrorMessage } from "@/lib/db-errors";
+import { flash } from "@/lib/flash";
 import { parseAmountToSen } from "@/lib/money";
 import { isValidISODate } from "@/lib/dates";
 import { isUuid, str, type FormState } from "@/lib/validation";
 
 async function parseGoalForm(formData: FormData) {
   const { t } = await getI18n();
-  const name = str(formData, "name", 60);
+  const name = str(formData, "goal_name", 60);
   const target = parseAmountToSen(str(formData, "target_amount"));
   const targetDate = str(formData, "target_date");
   const scope = str(formData, "scope") === "all" ? "all" : "accounts";
@@ -50,8 +52,10 @@ export async function createGoal(_: FormState, formData: FormData): Promise<Form
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
   const { data, error } = await supabase.from("goals").insert(values).select("id").single();
-  if (error || !data) return { error: t.common.genericError };
-  if (await saveGoalAccounts(supabase, data.id, accountIds)) return { error: t.common.genericError };
+  if (error || !data) return { error: error ? dbErrorMessage(error, t, "createGoal") : t.common.genericError };
+  const linkError = await saveGoalAccounts(supabase, data.id, accountIds);
+  if (linkError) return { error: dbErrorMessage(linkError, t, "createGoal") };
+  await flash("goalCreated");
 
   revalidatePath("/", "layout");
   redirect("/goals");
@@ -65,8 +69,10 @@ export async function updateGoal(id: string, _: FormState, formData: FormData): 
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
   const { error } = await supabase.from("goals").update(values).eq("id", id);
-  if (error) return { error: t.common.genericError };
-  if (await saveGoalAccounts(supabase, id, accountIds)) return { error: t.common.genericError };
+  if (error) return { error: dbErrorMessage(error, t, "updateGoal") };
+  const linkError = await saveGoalAccounts(supabase, id, accountIds);
+  if (linkError) return { error: dbErrorMessage(linkError, t, "updateGoal") };
+  await flash("goalUpdated");
 
   revalidatePath("/", "layout");
   redirect("/goals");
@@ -75,7 +81,8 @@ export async function updateGoal(id: string, _: FormState, formData: FormData): 
 export async function deleteGoal(id: string) {
   if (!isUuid(id)) return;
   const { supabase } = await requireUser();
-  await supabase.from("goals").delete().eq("id", id);
+  const { error } = await supabase.from("goals").delete().eq("id", id);
+  if (!error) await flash("goalDeleted");
   revalidatePath("/", "layout");
   redirect("/goals");
 }

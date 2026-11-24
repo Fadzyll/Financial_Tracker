@@ -3,6 +3,8 @@ import "./globals.css";
 import { getI18n } from "@/lib/i18n/server";
 import { I18nProvider } from "@/lib/i18n/client";
 import { ServiceWorkerRegister } from "@/components/sw-register";
+import { cookies } from "next/headers";
+import { THEME_COOKIE, isTheme } from "@/lib/theme";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getI18n();
@@ -30,8 +32,9 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale } = await getI18n();
+  const theme = (await cookies()).get(THEME_COOKIE)?.value;
   return (
-    <html lang={locale}>
+    <html lang={locale} data-theme={isTheme(theme) ? theme : undefined} suppressHydrationWarning>
       <body className="min-h-dvh font-sans antialiased">
         <I18nProvider locale={locale}>{children}</I18nProvider>
         <ServiceWorkerRegister />

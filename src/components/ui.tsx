@@ -2,9 +2,23 @@
 
 import clsx from "clsx";
 import Link from "next/link";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useI18n } from "@/lib/i18n/client";
 import { buttonClass, type Variant } from "./button-class";
+
+/**
+ * Spread on inputs that must not show browser / password-manager autofill
+ * (e.g. account and goal names, where Chrome suggests people's names).
+ */
+export const noAutofill = {
+  autoComplete: "off",
+  "data-1p-ignore": "true",
+  "data-lpignore": "true",
+  "data-bwignore": "true",
+  "data-form-type": "other",
+} as const;
 
 export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
@@ -36,13 +50,17 @@ export function SubmitButton({
   variant = "primary",
   className,
   confirmMessage,
+  pending: pendingProp,
 }: {
   children: React.ReactNode;
   variant?: Variant;
   className?: string;
   confirmMessage?: string;
+  /** Pass when the form submits via onSubmit (useFormAction) */
+  pending?: boolean;
 }) {
-  const { pending } = useFormStatus();
+  const status = useFormStatus();
+  const pending = pendingProp ?? status.pending;
   const { t } = useI18n();
   return (
     <button
@@ -61,8 +79,30 @@ export function SubmitButton({
 const fieldClass =
   "block w-full min-h-11 rounded-xl border border-border bg-surface px-3 text-base text-text placeholder:text-muted/70 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
 
-export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+export function Input({ className, ...props }: React.ComponentProps<"input">) {
   return <input className={clsx(fieldClass, className)} {...props} />;
+}
+
+/** Password field with an eye button to show or hide what was typed. */
+export function PasswordInput({ className, ...props }: Omit<React.InputHTMLAttributes<HTMLInputElement>, "type">) {
+  const { t } = useI18n();
+  const [visible, setVisible] = useState(false);
+  const Icon = visible ? EyeOff : Eye;
+  return (
+    <div className="relative">
+      <input type={visible ? "text" : "password"} className={clsx(fieldClass, "pr-12", className)} {...props} />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        aria-label={visible ? t.auth.hidePassword : t.auth.showPassword}
+        aria-pressed={visible}
+        title={visible ? t.auth.hidePassword : t.auth.showPassword}
+        className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-muted hover:text-text focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
+      >
+        <Icon className="size-5" />
+      </button>
+    </div>
+  );
 }
 
 export function Select({ className, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {

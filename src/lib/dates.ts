@@ -5,6 +5,13 @@ export function todayISO() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kuala_Lumpur" }).format(new Date());
 }
 
+/** Yesterday's date as YYYY-MM-DD in Malaysia time. */
+export function yesterdayISO() {
+  const d = new Date(`${todayISO()}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
 /** "2026-11" for the current month in Malaysia time. */
 export function currentMonth() {
   return todayISO().slice(0, 7);
@@ -58,4 +65,13 @@ export function monthsUntil(targetISO: string) {
   const [ty, tm] = today.split("-").map(Number);
   const [gy, gm] = targetISO.split("-").map(Number);
   return Math.max(1, (gy - ty) * 12 + (gm - tm));
+}
+
+/** "Nov" / "Nov 26" style short month label. */
+export function formatMonthShort(month: string, locale: Locale, withYear = false) {
+  return new Intl.DateTimeFormat(locale === "ms" ? "ms-MY" : "en-MY", {
+    month: "short",
+    ...(withYear ? { year: "2-digit" as const } : {}),
+    timeZone: "UTC",
+  }).format(new Date(`${month}-01T00:00:00Z`));
 }

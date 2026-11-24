@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Financial Tracker",
-    short_name: "FinTrack",
-    description: "Track your money in, money out and savings goals.",
+    name: "KiraDuit",
+    short_name: "KiraDuit",
+    description: "Count your money in, money out, and what's left. Kira duit masuk, duit keluar, dan berapa lagi tinggal.",
     start_url: "/dashboard",
     scope: "/",
     display: "standalone",
