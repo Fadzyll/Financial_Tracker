@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
+import { dbErrorMessage } from "@/lib/db-errors";
 import { parseAmountToSen } from "@/lib/money";
 import { todayISO } from "@/lib/dates";
 import { ACCOUNT_TYPES, type AccountType } from "@/lib/types";
@@ -41,7 +42,7 @@ export async function createAccount(_: FormState, formData: FormData): Promise<F
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
   const { error } = await supabase.from("accounts").insert(values);
-  if (error) return { error: t.common.genericError };
+  if (error) return { error: dbErrorMessage(error, t, "createAccount") };
   refresh();
   redirect("/accounts");
 }
@@ -54,7 +55,7 @@ export async function updateAccount(id: string, _: FormState, formData: FormData
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
   const { error } = await supabase.from("accounts").update(values).eq("id", id);
-  if (error) return { error: t.common.genericError };
+  if (error) return { error: dbErrorMessage(error, t, "updateAccount") };
   refresh();
   redirect(`/accounts/${id}`);
 }
@@ -90,7 +91,7 @@ export async function updateAccountValue(id: string, _: FormState, formData: For
     .select("balance")
     .eq("id", id)
     .single();
-  if (readError || !account) return { error: t.common.genericError };
+  if (readError || !account) return { error: readError ? dbErrorMessage(readError, t, "updateAccountValue") : t.common.genericError };
 
   const delta = newValue - Number(account.balance);
   if (delta === 0) return { fieldErrors: { new_value: t.accounts.valueUnchanged } };
@@ -102,7 +103,7 @@ export async function updateAccountValue(id: string, _: FormState, formData: For
     occurred_on: todayISO(),
     note: str(formData, "note", 200) || null,
   });
-  if (error) return { error: t.common.genericError };
+  if (error) return { error: dbErrorMessage(error, t, "updateAccountValue") };
   refresh();
   redirect(`/accounts/${id}`);
 }

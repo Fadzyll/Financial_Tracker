@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useActionState, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { ACCOUNT_TYPE_ICONS } from "@/components/account-icon";
 import { OTHER, ProviderPicker } from "@/components/provider-picker";
@@ -11,6 +11,7 @@ import { senToInput } from "@/lib/money";
 import { GROUPS_FOR_TYPE, getProvider } from "@/lib/providers";
 import { ACCOUNT_TYPES, type AccountType, type AccountWithBalance } from "@/lib/types";
 import type { FormState } from "@/lib/validation";
+import { useFormAction } from "@/lib/use-form-action";
 
 export function AccountForm({
   action,
@@ -22,7 +23,7 @@ export function AccountForm({
   cancelHref: string;
 }) {
   const { t } = useI18n();
-  const [state, formAction] = useActionState(action, {});
+  const { state, onSubmit, pending } = useFormAction(action);
   const fe = state.fieldErrors ?? {};
 
   const [type, setType] = useState<AccountType>(account?.type ?? "bank");
@@ -43,7 +44,7 @@ export function AccountForm({
 
   return (
     <Card>
-      <form action={formAction} className="space-y-5" autoComplete="off">
+      <form onSubmit={onSubmit} className="space-y-5" autoComplete="off">
         <FormError message={state.error} />
         <p className="flex items-start gap-2 rounded-xl bg-brand-soft px-3 py-2 text-xs text-brand-strong">
           <ShieldCheck className="mt-0.5 size-4 shrink-0" /> {t.accounts.privacyNote}
@@ -145,7 +146,7 @@ export function AccountForm({
           <ButtonLink href={cancelHref} variant="secondary" className="flex-1">
             {t.common.cancel}
           </ButtonLink>
-          <SubmitButton className="flex-1">{t.common.save}</SubmitButton>
+          <SubmitButton className="flex-1" pending={pending}>{t.common.save}</SubmitButton>
         </div>
       </form>
     </Card>

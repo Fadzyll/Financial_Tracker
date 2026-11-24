@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
+import { dbErrorMessage } from "@/lib/db-errors";
 import { parseAmountToSen } from "@/lib/money";
 import { isValidISODate } from "@/lib/dates";
 import type { TransactionKind } from "@/lib/types";
@@ -67,7 +68,7 @@ export async function createTransaction(_: FormState, formData: FormData): Promi
   }
 
   const { error } = await supabase.from("transactions").insert(values);
-  if (error) return { error: t.common.genericError };
+  if (error) return { error: dbErrorMessage(error, t, "createTransaction") };
   revalidatePath("/", "layout");
 
   const next = str(formData, "next");
@@ -85,7 +86,7 @@ export async function updateTransaction(id: string, _: FormState, formData: Form
   }
 
   const { error } = await supabase.from("transactions").update(values).eq("id", id);
-  if (error) return { error: t.common.genericError };
+  if (error) return { error: dbErrorMessage(error, t, "updateTransaction") };
   revalidatePath("/", "layout");
   redirect("/transactions");
 }

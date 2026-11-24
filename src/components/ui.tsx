@@ -50,13 +50,17 @@ export function SubmitButton({
   variant = "primary",
   className,
   confirmMessage,
+  pending: pendingProp,
 }: {
   children: React.ReactNode;
   variant?: Variant;
   className?: string;
   confirmMessage?: string;
+  /** Pass when the form submits via onSubmit (useFormAction) */
+  pending?: boolean;
 }) {
-  const { pending } = useFormStatus();
+  const status = useFormStatus();
+  const pending = pendingProp ?? status.pending;
   const { t } = useI18n();
   return (
     <button

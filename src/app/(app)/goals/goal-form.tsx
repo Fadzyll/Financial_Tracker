@@ -1,12 +1,13 @@
 "use client";
 
 import clsx from "clsx";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { ButtonLink, Card, Field, FormError, Input, SubmitButton, noAutofill } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/client";
 import { formatMoney, senToInput } from "@/lib/money";
 import type { AccountWithBalance, Goal } from "@/lib/types";
 import type { FormState } from "@/lib/validation";
+import { useFormAction } from "@/lib/use-form-action";
 
 export function GoalForm({
   action,
@@ -18,14 +19,14 @@ export function GoalForm({
   goal?: Goal;
 }) {
   const { t, locale } = useI18n();
-  const [state, formAction] = useActionState(action, {});
+  const { state, onSubmit, pending } = useFormAction(action);
   const [scope, setScope] = useState<"all" | "accounts">(goal?.scope ?? "accounts");
   const linked = new Set(goal?.goal_accounts.map((g) => g.account_id));
   const fe = state.fieldErrors ?? {};
 
   return (
     <Card>
-      <form action={formAction} className="space-y-4" autoComplete="off">
+      <form onSubmit={onSubmit} className="space-y-4" autoComplete="off">
         <FormError message={state.error} />
         <Field label={t.goals.name} htmlFor="goal_name" error={fe.name}>
           <Input
@@ -104,7 +105,7 @@ export function GoalForm({
           <ButtonLink href="/goals" variant="secondary" className="flex-1">
             {t.common.cancel}
           </ButtonLink>
-          <SubmitButton className="flex-1">{t.common.save}</SubmitButton>
+          <SubmitButton className="flex-1" pending={pending}>{t.common.save}</SubmitButton>
         </div>
       </form>
     </Card>

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
+import { dbErrorMessage } from "@/lib/db-errors";
 import { parseAmountToSen } from "@/lib/money";
 import { isValidISODate } from "@/lib/dates";
 import { isUuid, str, type FormState } from "@/lib/validation";
@@ -50,8 +51,9 @@ export async function createGoal(_: FormState, formData: FormData): Promise<Form
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
   const { data, error } = await supabase.from("goals").insert(values).select("id").single();
-  if (error || !data) return { error: t.common.genericError };
-  if (await saveGoalAccounts(supabase, data.id, accountIds)) return { error: t.common.genericError };
+  if (error || !data) return { error: error ? dbErrorMessage(error, t, "createGoal") : t.common.genericError };
+  const linkError = await saveGoalAccounts(supabase, data.id, accountIds);
+  if (linkError) return { error: dbErrorMessage(linkError, t, "createGoal") };
 
   revalidatePath("/", "layout");
   redirect("/goals");
@@ -65,8 +67,9 @@ export async function updateGoal(id: string, _: FormState, formData: FormData): 
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
   const { error } = await supabase.from("goals").update(values).eq("id", id);
-  if (error) return { error: t.common.genericError };
-  if (await saveGoalAccounts(supabase, id, accountIds)) return { error: t.common.genericError };
+  if (error) return { error: dbErrorMessage(error, t, "updateGoal") };
+  const linkError = await saveGoalAccounts(supabase, id, accountIds);
+  if (linkError) return { error: dbErrorMessage(linkError, t, "updateGoal") };
 
   revalidatePath("/", "layout");
   redirect("/goals");

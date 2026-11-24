@@ -1,13 +1,14 @@
 "use client";
 
 import clsx from "clsx";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { ButtonLink, Card, Field, FormError, Input, Select, SubmitButton, noAutofill } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/client";
 import { categoryLabel } from "@/lib/labels";
 import { senToInput } from "@/lib/money";
 import type { AccountWithBalance, Category, Transaction, TransactionKind } from "@/lib/types";
 import type { FormState } from "@/lib/validation";
+import { useFormAction } from "@/lib/use-form-action";
 
 const PICKABLE_KINDS: TransactionKind[] = ["expense", "income", "transfer"];
 
@@ -29,7 +30,7 @@ export function TransactionForm({
   next?: string;
 }) {
   const { t } = useI18n();
-  const [state, formAction] = useActionState(action, {});
+  const { state, onSubmit, pending } = useFormAction(action);
   const [kind, setKind] = useState<TransactionKind>(transaction?.kind ?? defaults.kind);
   const fe = state.fieldErrors ?? {};
 
@@ -40,7 +41,7 @@ export function TransactionForm({
 
   return (
     <Card>
-      <form action={formAction} className="space-y-4" autoComplete="off">
+      <form onSubmit={onSubmit} className="space-y-4" autoComplete="off">
         <FormError message={state.error} />
         <input type="hidden" name="kind" value={kind} />
         {next && <input type="hidden" name="next" value={next} />}
@@ -161,7 +162,7 @@ export function TransactionForm({
           <ButtonLink href={cancelHref} variant="secondary" className="flex-1">
             {t.common.cancel}
           </ButtonLink>
-          <SubmitButton className="flex-1">{t.common.save}</SubmitButton>
+          <SubmitButton className="flex-1" pending={pending}>{t.common.save}</SubmitButton>
         </div>
       </form>
     </Card>

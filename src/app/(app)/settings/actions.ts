@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
+import { dbErrorMessage } from "@/lib/db-errors";
 import { isUuid, str, type FormState } from "@/lib/validation";
 
 export async function updateProfile(_: FormState, formData: FormData): Promise<FormState & { ok?: boolean }> {
@@ -10,7 +11,7 @@ export async function updateProfile(_: FormState, formData: FormData): Promise<F
   const { t } = await getI18n();
   const displayName = str(formData, "display_name", 60) || null;
   const { error } = await supabase.from("profiles").upsert({ id: userId, display_name: displayName });
-  if (error) return { error: t.common.genericError };
+  if (error) return { error: dbErrorMessage(error, t, "updateProfile") };
   revalidatePath("/", "layout");
   return { ok: true };
 }
@@ -26,7 +27,7 @@ export async function addCategory(_: FormState, formData: FormData): Promise<For
   if (error) {
     return error.code === "23505"
       ? { fieldErrors: { name: t.settings.categoryExists } }
-      : { error: t.common.genericError };
+      : { error: dbErrorMessage(error, t, "addCategory") };
   }
   revalidatePath("/settings");
   return {};
