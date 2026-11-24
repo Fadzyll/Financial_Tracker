@@ -28,7 +28,7 @@ export function Avatar({ name, email, className }: { name: string; email: string
   );
 }
 
-function SignOutButton({ className }: { className?: string }) {
+export function SignOutButton({ className }: { className?: string }) {
   const { t } = useI18n();
   const [pending, setPending] = useState(false);
   return (
@@ -44,22 +44,6 @@ function SignOutButton({ className }: { className?: string }) {
         <LogOut className="size-5" /> {t.auth.signOut}
       </button>
     </form>
-  );
-}
-
-/** Bottom of the laptop sidebar: who is logged in + log out. */
-export function SidebarAccount({ name, email }: { name: string; email: string }) {
-  return (
-    <div className="border-t border-border pt-3">
-      <div className="mb-1 flex items-center gap-3 px-2 py-2">
-        <Avatar name={name} email={email} />
-        <div className="min-w-0">
-          {name && <p className="truncate text-sm font-semibold">{name}</p>}
-          <p className="truncate text-xs text-muted">{email}</p>
-        </div>
-      </div>
-      <SignOutButton />
-    </div>
   );
 }
 

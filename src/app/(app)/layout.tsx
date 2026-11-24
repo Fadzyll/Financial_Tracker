@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BottomNav, SidebarNav } from "@/components/nav";
 import { LanguageToggle } from "@/components/language-toggle";
-import { MobileUserMenu, SidebarAccount } from "@/components/user-menu";
+import { MobileUserMenu } from "@/components/user-menu";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 
@@ -24,13 +24,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {t.appName}
         </Link>
         <SidebarNav />
-        <div className="mt-auto space-y-3">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-xs font-medium text-muted">{t.common.language}</span>
-            <LanguageToggle />
-          </div>
-          <SidebarAccount name={name} email={email} />
-        </div>
       </aside>
 
       <div className="min-w-0 flex-1">
@@ -42,7 +35,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <LanguageToggle />
           <MobileUserMenu name={name} email={email} />
         </header>
-        <main className="mx-auto w-full max-w-3xl px-4 pt-5 pb-28 md:px-8 md:pt-8 md:pb-12">{children}</main>
+        {/* Laptop: language switch in the top-right corner */}
+        <div className="hidden justify-end px-8 pt-5 md:flex">
+          <LanguageToggle />
+        </div>
+        <main className="mx-auto w-full max-w-3xl px-4 pt-5 pb-28 md:px-8 md:pt-0 md:pb-12">{children}</main>
       </div>
 
       <BottomNav />

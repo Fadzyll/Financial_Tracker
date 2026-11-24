@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowLeftRight, Home, Plus, Settings, Target, Wallet } from "lucide-react";
 import { useI18n } from "@/lib/i18n/client";
+import { SignOutButton } from "@/components/user-menu";
 
 function useItems() {
   const { t } = useI18n();
@@ -48,6 +49,7 @@ export function SidebarNav() {
           <Icon className="size-5" /> {label}
         </Link>
       ))}
+      <SignOutButton />
     </nav>
   );
 }
