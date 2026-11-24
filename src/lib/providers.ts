@@ -94,12 +94,10 @@ export const PROVIDERS: Provider[] = [
   // Gold
   { id: "public-gold", name: "Public Gold", short: "PG", group: "gold", type: "gold", color: "#C9A227", fg: "#1A1300", aliases: ["emas"] },
   { id: "maybank-gold", name: "Maybank Gold (MIGA-i)", short: "MIGA", group: "gold", type: "gold", color: "#FFC72C", fg: "#111111", aliases: ["miga", "emas"] },
-  { id: "poh-kong", name: "Poh Kong", short: "PK", group: "gold", type: "gold", color: "#B8860B", fg: "#1A1300", aliases: ["emas"] },
   { id: "habib", name: "Habib Jewels", short: "HJ", group: "gold", type: "gold", color: "#7A1F2B", aliases: ["emas"] },
 
   // Retirement
   { id: "epf", name: "KWSP / EPF", short: "EPF", group: "retirement", type: "retirement", color: "#003A70", aliases: ["kwsp", "i-akaun"] },
-  { id: "prs", name: "PRS (Private Retirement Scheme)", short: "PRS", group: "retirement", type: "retirement", color: "#4B5563", aliases: ["persaraan swasta"] },
 ];
 
 /** Which provider groups make sense for each account type. */
