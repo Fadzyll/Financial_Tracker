@@ -1,6 +1,8 @@
 import clsx from "clsx";
 import { Banknote, Gem, Landmark, PiggyBank, Smartphone, TrendingUp, Wallet } from "lucide-react";
 import type { AccountType } from "@/lib/types";
+import { getProvider } from "@/lib/providers";
+import { ProviderLogo } from "@/components/provider-logo";
 
 const ICONS: Record<AccountType, typeof Wallet> = {
   bank: Landmark,
@@ -12,7 +14,18 @@ const ICONS: Record<AccountType, typeof Wallet> = {
   other: Wallet,
 };
 
-export function AccountIcon({ type, className }: { type: AccountType; className?: string }) {
+/** Provider logo/badge when the account has a known provider, else the type icon. */
+export function AccountIcon({
+  type,
+  provider,
+  className,
+}: {
+  type: AccountType;
+  provider?: string | null;
+  className?: string;
+}) {
+  const known = getProvider(provider);
+  if (known) return <ProviderLogo provider={known} className={className} />;
   const Icon = ICONS[type] ?? Wallet;
   return (
     <span

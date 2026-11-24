@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useActionState, useState } from "react";
-import { ButtonLink, Card, Field, FormError, Input, SubmitButton } from "@/components/ui";
+import { ButtonLink, Card, Field, FormError, Input, SubmitButton, noAutofill } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/client";
 import { formatMoney, senToInput } from "@/lib/money";
 import type { AccountWithBalance, Goal } from "@/lib/types";
@@ -25,12 +25,13 @@ export function GoalForm({
 
   return (
     <Card>
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} className="space-y-4" autoComplete="off">
         <FormError message={state.error} />
-        <Field label={t.goals.name} htmlFor="name" error={fe.name}>
+        <Field label={t.goals.name} htmlFor="goal_name" error={fe.name}>
           <Input
-            id="name"
-            name="name"
+            id="goal_name"
+            name="goal_name"
+            {...noAutofill}
             required
             maxLength={60}
             placeholder={t.goals.namePlaceholder}
@@ -44,6 +45,7 @@ export function GoalForm({
             inputMode="decimal"
             required
             placeholder="10,000"
+            {...noAutofill}
             className="tabular"
             defaultValue={goal ? senToInput(goal.target_amount) : ""}
           />

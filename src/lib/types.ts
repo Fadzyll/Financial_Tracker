@@ -23,6 +23,8 @@ export interface AccountWithBalance {
   archived: boolean;
   created_at: string;
   balance: number;
+  /** Built-in provider id (src/lib/providers.ts), or null for a custom name */
+  provider: string | null;
 }
 
 export interface Category {

@@ -25,8 +25,9 @@ Money is stored as whole sen (`bigint`) to avoid rounding errors.
 
 ### 1. Create a Supabase project
 1. Create a free project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run the contents of `supabase/migrations/20261123000000_init.sql`
+2. Open **SQL Editor** and run every file in `supabase/migrations/` **in filename order**
    (or, with the Supabase CLI: `npx supabase link` then `npx supabase db push`).
+   When you pull new changes later, run any new migration files the same way.
 3. In **Authentication → URL Configuration** set **Site URL** to your app URL and add
    `https://<your-domain>/auth/confirm` to **Redirect URLs**.
 4. Recommended: in **Authentication → Email Templates → Confirm signup**, change the link to
@@ -63,10 +64,12 @@ src/
     i18n/            EN/BM dictionaries + locale cookie
     supabase/        server/browser clients, session refresh
     money.ts         RM parsing/formatting (sen)
+    providers.ts     built-in list of Malaysian banks, e-wallets, investments
   proxy.ts           session refresh + login redirect (Next 16 "proxy", formerly middleware)
 public/
   sw.js              service worker (caches static assets only, never financial pages)
   icons/             app icons (regenerate with `npm run icons`)
+  providers/         optional bank/provider logos (see README inside)
 supabase/migrations/ database schema, RLS policies, default categories
 ```
 

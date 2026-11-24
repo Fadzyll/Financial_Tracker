@@ -37,7 +37,7 @@ export default async function AccountPage({ params }: { params: Promise<{ id: st
 
       <Card className="mb-4">
         <div className="flex items-center gap-3">
-          <AccountIcon type={account.type} />
+          <AccountIcon type={account.type} provider={account.provider} />
           <div className="min-w-0 flex-1">
             <p className="text-sm text-muted">
               {t.accountTypes[account.type]}

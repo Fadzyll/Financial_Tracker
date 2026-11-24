@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { Check } from "lucide-react";
-import { Field, FormError, Input, Select, SubmitButton } from "@/components/ui";
+import { Field, FormError, Input, Select, SubmitButton, noAutofill } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/client";
 import type { FormState } from "@/lib/validation";
 import { addCategory, updateProfile } from "./actions";
@@ -40,8 +40,9 @@ export function AddCategoryForm() {
       <FormError message={state.error} />
       <div className="flex flex-col gap-2 sm:flex-row">
         <Input
-          name="name"
+          name="category_name"
           aria-label={t.settings.categoryName}
+          {...noAutofill}
           placeholder={t.settings.categoryName}
           maxLength={40}
           required

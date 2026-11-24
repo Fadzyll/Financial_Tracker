@@ -8,6 +8,18 @@ import { Eye, EyeOff } from "lucide-react";
 import { useI18n } from "@/lib/i18n/client";
 import { buttonClass, type Variant } from "./button-class";
 
+/**
+ * Spread on inputs that must not show browser / password-manager autofill
+ * (e.g. account and goal names, where Chrome suggests people's names).
+ */
+export const noAutofill = {
+  autoComplete: "off",
+  "data-1p-ignore": "true",
+  "data-lpignore": "true",
+  "data-bwignore": "true",
+  "data-form-type": "other",
+} as const;
+
 export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
@@ -63,7 +75,7 @@ export function SubmitButton({
 const fieldClass =
   "block w-full min-h-11 rounded-xl border border-border bg-surface px-3 text-base text-text placeholder:text-muted/70 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30";
 
-export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+export function Input({ className, ...props }: React.ComponentProps<"input">) {
   return <input className={clsx(fieldClass, className)} {...props} />;
 }
 

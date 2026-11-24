@@ -7,12 +7,18 @@ import { getI18n } from "@/lib/i18n/server";
 import { parseAmountToSen } from "@/lib/money";
 import { todayISO } from "@/lib/dates";
 import { ACCOUNT_TYPES, type AccountType } from "@/lib/types";
+import { getProvider, isProviderId } from "@/lib/providers";
 import { isUuid, str, type FormState } from "@/lib/validation";
 
 async function parseAccountForm(formData: FormData) {
   const { t } = await getI18n();
-  const name = str(formData, "name", 60);
-  const institution = str(formData, "institution", 60) || null;
+  const name = str(formData, "account_name", 60);
+  // Built-in provider → store its id (and its name for exports);
+  // otherwise keep the custom name the user typed.
+  const providerId = str(formData, "provider", 40);
+  const known = isProviderId(providerId) ? getProvider(providerId) : undefined;
+  const provider = known?.id ?? null;
+  const institution = known?.name ?? (str(formData, "institution", 60) || null);
   const type = str(formData, "type") as AccountType;
   const opening = parseAmountToSen(str(formData, "opening_balance") || "0", { allowNegative: true });
 
@@ -21,7 +27,7 @@ async function parseAccountForm(formData: FormData) {
   if (!ACCOUNT_TYPES.includes(type)) fieldErrors.type = t.common.required;
   if (opening === null) fieldErrors.opening_balance = t.common.invalidAmount;
 
-  return { fieldErrors, values: { name, institution, type, opening_balance: opening ?? 0 } };
+  return { fieldErrors, values: { name, institution, provider, type, opening_balance: opening ?? 0 } };
 }
 
 function refresh() {

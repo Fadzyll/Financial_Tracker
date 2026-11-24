@@ -83,7 +83,7 @@ function AccountList({
       {accounts.map((a) => (
         <li key={a.id}>
           <Link href={`/accounts/${a.id}`} className="flex items-center gap-3 p-4 hover:bg-surface-2">
-            <AccountIcon type={a.type} />
+            <AccountIcon type={a.type} provider={a.provider} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold">{a.name}</p>
               <p className="truncate text-xs text-muted">

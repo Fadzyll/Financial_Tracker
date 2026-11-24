@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useActionState, useState } from "react";
-import { ButtonLink, Card, Field, FormError, Input, Select, SubmitButton } from "@/components/ui";
+import { ButtonLink, Card, Field, FormError, Input, Select, SubmitButton, noAutofill } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/client";
 import { categoryLabel } from "@/lib/labels";
 import { senToInput } from "@/lib/money";
@@ -40,7 +40,7 @@ export function TransactionForm({
 
   return (
     <Card>
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} className="space-y-4" autoComplete="off">
         <FormError message={state.error} />
         <input type="hidden" name="kind" value={kind} />
         {next && <input type="hidden" name="next" value={next} />}
@@ -85,6 +85,7 @@ export function TransactionForm({
             autoFocus={!transaction}
             placeholder="0.00"
             className="tabular text-lg font-semibold"
+            {...noAutofill}
             defaultValue={transaction ? senToInput(transaction.amount) : ""}
           />
         </Field>
@@ -151,6 +152,7 @@ export function TransactionForm({
             name="note"
             maxLength={200}
             placeholder={t.transactions.notePlaceholder}
+            {...noAutofill}
             defaultValue={transaction?.note ?? ""}
           />
         </Field>

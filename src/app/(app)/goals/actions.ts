@@ -10,7 +10,7 @@ import { isUuid, str, type FormState } from "@/lib/validation";
 
 async function parseGoalForm(formData: FormData) {
   const { t } = await getI18n();
-  const name = str(formData, "name", 60);
+  const name = str(formData, "goal_name", 60);
   const target = parseAmountToSen(str(formData, "target_amount"));
   const targetDate = str(formData, "target_date");
   const scope = str(formData, "scope") === "all" ? "all" : "accounts";

@@ -18,7 +18,7 @@ export async function updateProfile(_: FormState, formData: FormData): Promise<F
 export async function addCategory(_: FormState, formData: FormData): Promise<FormState> {
   const { supabase } = await requireUser();
   const { t } = await getI18n();
-  const name = str(formData, "name", 40);
+  const name = str(formData, "category_name", 40);
   const kind = str(formData, "kind") === "income" ? "income" : "expense";
   if (!name) return { fieldErrors: { name: t.common.required } };
 
