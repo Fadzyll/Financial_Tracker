@@ -68,7 +68,7 @@ export async function getTransactions(opts: {
 }
 
 /** Money in / out for a month. Transfers and value updates are not counted. */
-export function summarize(transactions: Transaction[]) {
+export function summarize(transactions: Pick<Transaction, "kind" | "amount">[]) {
   let income = 0;
   let expense = 0;
   for (const tx of transactions) {
@@ -91,4 +91,19 @@ export async function getTransaction(id: string) {
   const { supabase } = await requireUser();
   const { data } = await supabase.from("transactions").select("*").eq("id", id).maybeSingle();
   return (data ?? null) as Transaction | null;
+}
+
+/** Every transaction (only the columns the charts need), oldest first. */
+export async function getTransactionHistory() {
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("kind, amount, occurred_on, account_id, to_account_id, category_id")
+    .order("occurred_on")
+    .limit(20000);
+  if (error) fail("getTransactionHistory", error);
+  return (data ?? []) as Pick<
+    Transaction,
+    "kind" | "amount" | "occurred_on" | "account_id" | "to_account_id" | "category_id"
+  >[];
 }

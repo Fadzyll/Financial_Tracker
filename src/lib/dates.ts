@@ -59,3 +59,12 @@ export function monthsUntil(targetISO: string) {
   const [gy, gm] = targetISO.split("-").map(Number);
   return Math.max(1, (gy - ty) * 12 + (gm - tm));
 }
+
+/** "Nov" / "Nov 26" style short month label. */
+export function formatMonthShort(month: string, locale: Locale, withYear = false) {
+  return new Intl.DateTimeFormat(locale === "ms" ? "ms-MY" : "en-MY", {
+    month: "short",
+    ...(withYear ? { year: "2-digit" as const } : {}),
+    timeZone: "UTC",
+  }).format(new Date(`${month}-01T00:00:00Z`));
+}

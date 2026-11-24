@@ -4,7 +4,12 @@ import { AccountIcon } from "@/components/account-icon";
 import { GoalCard } from "@/components/goal-card";
 import { TransactionList } from "@/components/transaction-list";
 import { ButtonLink, Card } from "@/components/ui";
-import { getAccounts, getCategories, getGoals, getTransactions, goalSaved, summarize } from "@/lib/data";
+import { CategoryBars } from "@/components/charts/category-bars";
+import { MonthlyFlowChart } from "@/components/charts/monthly-flow-chart";
+import { SavingsTrendChart } from "@/components/charts/savings-trend-chart";
+import { monthlyFlow, monthsBack, savingsTrend, spendingByCategory } from "@/lib/charts";
+import { getAccounts, getCategories, getGoals, getTransactionHistory, getTransactions, goalSaved, summarize } from "@/lib/data";
+import { categoryLabel } from "@/lib/labels";
 import { currentMonth, formatMonth } from "@/lib/dates";
 import { fmt } from "@/lib/i18n/dictionaries";
 import { getI18n } from "@/lib/i18n/server";
@@ -17,18 +22,32 @@ export default async function DashboardPage() {
   const { supabase, userId } = await requireUser();
   const month = currentMonth();
 
-  const [profile, allAccounts, categories, goals, monthTxns, recent] = await Promise.all([
+  const [profile, allAccounts, categories, goals, history, recent] = await Promise.all([
     supabase.from("profiles").select("display_name").eq("id", userId).maybeSingle(),
     getAccounts({ includeArchived: true }),
     getCategories(),
     getGoals(),
-    getTransactions({ month }),
+    getTransactionHistory(),
     getTransactions({ limit: 5 }),
   ]);
+  const monthTxns = history.filter((tx) => tx.occurred_on.startsWith(month));
 
   const accounts = allAccounts.filter((a) => !a.archived);
   const total = accounts.reduce((sum, a) => sum + a.balance, 0);
   const { income, expense, net } = summarize(monthTxns);
+
+  // Charts
+  const flow = monthlyFlow(history, monthsBack(month, 6));
+  const trend = savingsTrend(accounts, history, monthsBack(month, 12));
+  const spend = spendingByCategory(monthTxns, 5);
+  const categoryById = new Map(categories.map((c) => [c.id, c]));
+  const spendRows = [
+    ...spend.shown.map((c) => ({
+      label: c.categoryId ? categoryLabel(categoryById.get(c.categoryId), t) || t.charts.uncategorized : t.charts.uncategorized,
+      amount: c.amount,
+    })),
+    ...(spend.otherAmount > 0 ? [{ label: t.charts.other, amount: spend.otherAmount }] : []),
+  ];
   const name = profile.data?.display_name;
 
   const byType = ACCOUNT_TYPES.map((type) => ({
@@ -89,6 +108,11 @@ export default async function DashboardPage() {
             </div>
           </section>
 
+          {/* Charts */}
+          <MonthlyFlowChart data={flow} />
+          <SavingsTrendChart points={trend} />
+          <CategoryBars rows={spendRows} total={spend.total} t={t} locale={locale} />
+
           {/* Savings by type + accounts */}
           <section>
             <div className="mb-2 flex items-baseline justify-between">
@@ -99,18 +123,15 @@ export default async function DashboardPage() {
             </div>
             <Card>
               {positiveTotal > 0 && (
-                <div className="mb-4 flex h-3 w-full gap-0.5 overflow-hidden rounded-full">
+                <div className="mb-4 flex h-3 w-full gap-0.5">
                   {byType
                     .filter((x) => x.amount > 0)
-                    .map((x, i) => (
+                    .map((x) => (
                       <div
                         key={x.type}
-                        className="h-full bg-brand"
-                        style={{
-                          width: `${(x.amount / positiveTotal) * 100}%`,
-                          opacity: 1 - i * (0.6 / Math.max(byType.length, 1)),
-                        }}
-                        title={t.accountTypes[x.type]}
+                        className="h-full first:rounded-l-full last:rounded-r-full"
+                        style={{ width: `${(x.amount / positiveTotal) * 100}%`, background: typeColor(x.type) }}
+                        title={`${t.accountTypes[x.type]}: ${formatMoney(x.amount, locale)}`}
                       />
                     ))}
                 </div>
@@ -119,11 +140,12 @@ export default async function DashboardPage() {
                 {byType.map((x) => (
                   <li key={x.type} className="flex items-center gap-3">
                     <AccountIcon type={x.type} className="size-9" />
+                    <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: typeColor(x.type) }} aria-hidden />
                     <span className="flex-1 text-sm font-medium">{t.accountTypes[x.type]}</span>
                     <span className="tabular text-sm font-semibold">{formatMoney(x.amount, locale)}</span>
                     {positiveTotal > 0 && (
                       <span className="tabular w-11 text-right text-xs text-muted">
-                        {Math.round((Math.max(x.amount, 0) / positiveTotal) * 100)}%
+                        {sharePct(x.amount, positiveTotal)}
                       </span>
                     )}
                   </li>
@@ -179,4 +201,15 @@ export default async function DashboardPage() {
       )}
     </div>
   );
+}
+
+/** Each account type keeps the same chart colour everywhere (fixed order). */
+function typeColor(type: (typeof ACCOUNT_TYPES)[number]) {
+  return `var(--series-${ACCOUNT_TYPES.indexOf(type) + 1})`;
+}
+
+/** "33%", or "<1%" for a small but non-zero share. */
+function sharePct(amount: number, total: number) {
+  const pct = (Math.max(amount, 0) / total) * 100;
+  return pct > 0 && pct < 1 ? "<1%" : `${Math.round(pct)}%`;
 }

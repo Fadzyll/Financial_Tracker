@@ -33,3 +33,12 @@ export function formatMoney(sen: number, locale: Locale = "en", opts: { signed?:
 export function senToInput(sen: number) {
   return (sen / 100).toFixed(2);
 }
+
+/** Short axis label: RM 1.2K, RM 15K, RM 1.2M */
+export function formatMoneyCompact(sen: number, locale: Locale = "en") {
+  const n = new Intl.NumberFormat(locale === "ms" ? "ms-MY" : "en-MY", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(sen / 100);
+  return `RM ${n}`;
+}
