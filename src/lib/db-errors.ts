@@ -4,7 +4,7 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 type DbError = { message: string; code?: string; details?: string | null; hint?: string | null };
 
 /** Codes meaning the database is missing a table/column/permission the app expects. */
-const SETUP_CODES = new Set(["PGRST204", "PGRST205", "42703", "42P01", "42501"]);
+const SETUP_CODES = new Set(["PGRST202", "PGRST204", "PGRST205", "42703", "42883", "42P01", "42501"]);
 
 /**
  * Log a Supabase error (visible in Vercel → Logs) and turn it into a message

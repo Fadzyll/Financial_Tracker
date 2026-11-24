@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import { Field, FormError, Input, PasswordInput, Select, SubmitButton, noAutofill } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/client";
 import type { FormState } from "@/lib/validation";
-import { addCategory, changePassword, updateProfile } from "./actions";
+import { addCategory, changePassword, deleteMyAccount, updateProfile } from "./actions";
 
 export function ProfileForm({ displayName }: { displayName: string }) {
   const { t } = useI18n();
@@ -81,5 +81,27 @@ export function ChangePasswordForm() {
       </Field>
       <SubmitButton variant="secondary">{t.auth.changePassword}</SubmitButton>
     </form>
+  );
+}
+
+export function DeleteAccountForm({ email }: { email: string }) {
+  const { t } = useI18n();
+  const [state, action] = useActionState<FormState, FormData>(deleteMyAccount, {});
+  return (
+    <details className="group">
+      <summary className="cursor-pointer list-none text-sm font-semibold text-danger select-none">
+        {t.settings.deleteOpen} <span className="inline-block transition-transform group-open:rotate-90">›</span>
+      </summary>
+      <form action={action} className="mt-3 space-y-3">
+        <FormError message={state.error} />
+        <p className="text-xs text-muted">{t.settings.deleteTip}</p>
+        <Field label={t.settings.deleteConfirmLabel} htmlFor="confirm_email" error={state.fieldErrors?.confirm_email}>
+          <Input id="confirm_email" name="confirm_email" type="email" placeholder={email} required {...noAutofill} />
+        </Field>
+        <SubmitButton variant="danger" className="w-full" confirmMessage={t.common.confirmDelete}>
+          {t.settings.deleteButton}
+        </SubmitButton>
+      </form>
+    </details>
   );
 }

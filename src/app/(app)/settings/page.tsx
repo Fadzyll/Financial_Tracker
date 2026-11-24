@@ -1,4 +1,5 @@
-import { Download, Heart, KeyRound, Languages, LogOut, ShieldCheck, Tags, UserRound, X } from "lucide-react";
+import { Download, Heart, KeyRound, Languages, LogOut, ShieldCheck, Tags, Trash2, UserRound, X } from "lucide-react";
+import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
 import { buttonClass } from "@/components/button-class";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -11,7 +12,7 @@ import { getI18n } from "@/lib/i18n/server";
 import { categoryLabel } from "@/lib/labels";
 import { requireUser } from "@/lib/supabase/server";
 import { deleteCategory } from "./actions";
-import { AddCategoryForm, ChangePasswordForm, ProfileForm } from "./forms";
+import { AddCategoryForm, ChangePasswordForm, DeleteAccountForm, ProfileForm } from "./forms";
 
 function Section({
   icon: Icon,
@@ -127,6 +128,13 @@ export default async function SettingsPage() {
         <p className="flex items-start gap-2 text-xs text-muted">
           <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-brand" /> {t.settings.privacy}
         </p>
+        <Link href="/privacy" className="inline-block text-sm font-semibold text-brand">
+          {t.settings.privacyLink}
+        </Link>
+      </Section>
+
+      <Section icon={Trash2} title={t.settings.deleteTitle} hint={t.settings.deleteHint}>
+        <DeleteAccountForm email={email} />
       </Section>
     </div>
   );

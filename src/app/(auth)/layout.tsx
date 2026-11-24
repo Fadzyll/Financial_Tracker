@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { LanguageToggle } from "@/components/language-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getI18n } from "@/lib/i18n/server";
@@ -18,6 +19,11 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           <p className="mt-1 text-sm text-muted">{t.appTagline}</p>
         </div>
         {children}
+        <p className="mt-6 text-center text-xs">
+          <Link href="/privacy" className="text-muted hover:text-text">
+            {t.auth.privacy}
+          </Link>
+        </p>
       </main>
     </div>
   );

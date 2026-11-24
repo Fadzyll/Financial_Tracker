@@ -12,7 +12,9 @@ export default async function LoginPage({
     <AuthForm
       mode="login"
       notice={error === "confirm" ? t.auth.confirmFailed : undefined}
-      success={notice === "confirmed" ? t.auth.confirmedLogin : undefined}
+      success={
+        notice === "confirmed" ? t.auth.confirmedLogin : notice === "deleted" ? t.auth.accountDeleted : undefined
+      }
       info={notice === "expired" ? t.auth.linkExpired : undefined}
     />
   );

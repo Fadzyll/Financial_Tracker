@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { dbErrorMessage } from "@/lib/db-errors";
@@ -61,4 +62,17 @@ export async function changePassword(_: FormState, formData: FormData): Promise<
   if (error) return { error: error.code === "same_password" ? t.auth.samePassword : dbErrorMessage(error, t, "changePassword") };
   await flash("passwordChanged");
   return { ok: true };
+}
+
+/** Permanently delete the signed-in user and all their data. */
+export async function deleteMyAccount(_: FormState, formData: FormData): Promise<FormState> {
+  const { supabase, email } = await requireUser();
+  const { t } = await getI18n();
+  const typed = String(formData.get("confirm_email") ?? "").trim().toLowerCase();
+  if (!typed || typed !== email.toLowerCase()) return { fieldErrors: { confirm_email: t.settings.deleteMismatch } };
+
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) return { error: dbErrorMessage(error, t, "deleteMyAccount") };
+  await supabase.auth.signOut().catch(() => {});
+  redirect("/login?notice=deleted");
 }
