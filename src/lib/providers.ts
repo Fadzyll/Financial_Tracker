@@ -1,4 +1,5 @@
 import type { AccountType } from "@/lib/types";
+import downloadedLogos from "@/lib/provider-logos.json";
 
 /**
  * Built-in list of Malaysian banks and providers.
@@ -113,6 +114,13 @@ export const GROUPS_FOR_TYPE: Record<AccountType, ProviderGroup[]> = {
 };
 
 const BY_ID = new Map(PROVIDERS.map((p) => [p.id, p]));
+
+const LOGOS = downloadedLogos as Record<string, string>;
+
+/** Logo file for a provider: set by hand in this list, or downloaded by scripts/fetch-logos.mjs */
+export function providerLogo(p: Provider): string | undefined {
+  return p.logo ?? LOGOS[p.id];
+}
 
 export function getProvider(id: string | null | undefined): Provider | undefined {
   return id ? BY_ID.get(id) : undefined;

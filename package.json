@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "logos": "node scripts/fetch-logos.mjs",
     "icons": "NODE_PATH=$(npm root -g) node scripts/generate-icons.mjs"
   },
   "dependencies": {
