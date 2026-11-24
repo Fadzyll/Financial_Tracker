@@ -21,6 +21,22 @@ const force = process.argv.includes("--force");
 const UA = "Mozilla/5.0 (compatible; FinancialTrackerLogoFetcher/1.0)";
 const OK_TYPES = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
 const MIN_BYTES = 600; // smaller than this is usually a 16px favicon
+const MIN_PX = 64; // smaller icons look blurry; keep the coloured badge instead
+
+/** Width of a PNG/WebP/JPEG image, or 0 if unknown. */
+function imageWidth(buf, type) {
+  if (type === "image/png") return buf.readUInt32BE(16);
+  if (type === "image/webp" && buf.toString("ascii", 12, 16) === "VP8X") return 1 + buf.readUIntLE(24, 3);
+  if (type === "image/jpeg") {
+    for (let i = 2; i + 9 < buf.length; ) {
+      if (buf[i] !== 0xff) return 0;
+      const marker = buf[i + 1];
+      if (marker >= 0xc0 && marker <= 0xc3) return buf.readUInt16BE(i + 7);
+      i += 2 + buf.readUInt16BE(i + 2);
+    }
+  }
+  return 0;
+}
 
 await mkdir(new URL("public/providers/", root), { recursive: true });
 
@@ -68,9 +84,11 @@ async function download(id, domain) {
       if (!ext) continue;
       const buf = Buffer.from(await res.arrayBuffer());
       if (buf.length < MIN_BYTES) continue;
+      const width = imageWidth(buf, type);
+      if (width && width < MIN_PX) continue;
       const file = `${id}.${ext}`;
       await writeFile(new URL(`public/providers/${file}`, root), buf);
-      return { file, url, bytes: buf.length };
+      return { file, url, bytes: buf.length, width };
     } catch {
       // try the next candidate
     }
@@ -89,7 +107,7 @@ for (const id of ids) {
   if (got) {
     logos[id] = `/providers/${got.file}`;
     results.ok.push(id);
-    console.log(`ok     ${id.padEnd(20)} ${String(got.bytes).padStart(7)} bytes  ${got.url}`);
+    console.log(`ok     ${id.padEnd(20)} ${String(got.width || "?").padStart(4)}px ${String(got.bytes).padStart(7)} bytes  ${got.url}`);
   } else {
     results.failed.push(id);
     console.log(`FAILED ${id.padEnd(20)} (${domains[id]})`);
