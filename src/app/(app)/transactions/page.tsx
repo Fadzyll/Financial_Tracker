@@ -3,28 +3,41 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { TransactionList } from "@/components/transaction-list";
 import { ButtonLink, Card } from "@/components/ui";
-import { getAccounts, getCategories, getTransactions, summarize } from "@/lib/data";
+import { cleanSearch, getAccounts, getCategories, getTransactions, summarize } from "@/lib/data";
 import { currentMonth, formatMonth, isValidMonth, shiftMonth } from "@/lib/dates";
 import { getI18n } from "@/lib/i18n/server";
 import { formatMoney } from "@/lib/money";
 import { isUuid } from "@/lib/validation";
+import { Suspense } from "react";
+import { dictionaries } from "@/lib/i18n/dictionaries";
 import { AccountFilter } from "./filters";
+import { SearchBox } from "./search-box";
 
 export default async function TransactionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string; account?: string }>;
+  searchParams: Promise<{ month?: string; account?: string; q?: string }>;
 }) {
   const { t, locale } = await getI18n();
   const sp = await searchParams;
   const month = isValidMonth(sp.month) ? sp.month : currentMonth();
   const accountId = isUuid(sp.account) ? sp.account : undefined;
+  const search = cleanSearch(sp.q);
 
-  const [accounts, categories, transactions] = await Promise.all([
-    getAccounts({ includeArchived: true }),
-    getCategories(),
-    getTransactions({ month, accountId }),
-  ]);
+  const [accounts, categories] = await Promise.all([getAccounts({ includeArchived: true }), getCategories()]);
+  // Search looks across all months, in notes and in category names (EN + BM).
+  const needle = search.toLowerCase();
+  const searchCategoryIds = search
+    ? categories
+        .filter((c) =>
+          [c.name, c.key ? dictionaries.en.categories[c.key] : "", c.key ? dictionaries.ms.categories[c.key] : ""]
+            .some((label) => label?.toLowerCase().includes(needle)),
+        )
+        .map((c) => c.id)
+    : [];
+  const transactions = await getTransactions(
+    search ? { accountId, search, searchCategoryIds, limit: 300 } : { month, accountId },
+  );
   const { income, expense, net } = summarize(transactions);
 
   const link = (m: string) => {
@@ -39,14 +52,20 @@ export default async function TransactionsPage({
       <PageHeader
         title={t.transactions.title}
         action={
-          <ButtonLink href="/transactions/new" className="px-3">
+          <ButtonLink href="/transactions/new?from=%2Ftransactions" className="px-3">
             <Plus className="size-4" /> <span className="hidden sm:inline">{t.transactions.add}</span>
           </ButtonLink>
         }
       />
 
+      <div className="mb-3">
+        <Suspense>
+          <SearchBox />
+        </Suspense>
+      </div>
+
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-1 rounded-xl border border-border bg-surface p-1 sm:flex-1">
+        <div className={search ? "hidden" : "flex items-center gap-1 rounded-xl border border-border bg-surface p-1 sm:flex-1"}>
           <Link
             href={link(shiftMonth(month, -1))}
             aria-label="Previous month"
@@ -68,7 +87,7 @@ export default async function TransactionsPage({
           )}
         </div>
         <div className="sm:w-56">
-          <AccountFilter accounts={accounts} month={month} value={accountId} />
+          <AccountFilter accounts={accounts} month={month} value={accountId} q={search || undefined} />
         </div>
       </div>
 
@@ -88,12 +107,14 @@ export default async function TransactionsPage({
       </Card>
 
       <TransactionList
+              from={"/transactions"}
         transactions={transactions}
         accounts={accounts}
         categories={categories}
         t={t}
         locale={locale}
         accountId={accountId}
+        emptyText={search ? t.transactions.noResults : undefined}
       />
     </>
   );

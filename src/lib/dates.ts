@@ -5,6 +5,13 @@ export function todayISO() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kuala_Lumpur" }).format(new Date());
 }
 
+/** Yesterday's date as YYYY-MM-DD in Malaysia time. */
+export function yesterdayISO() {
+  const d = new Date(`${todayISO()}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
 /** "2026-11" for the current month in Malaysia time. */
 export function currentMonth() {
   return todayISO().slice(0, 7);

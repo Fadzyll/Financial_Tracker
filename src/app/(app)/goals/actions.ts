@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { dbErrorMessage } from "@/lib/db-errors";
+import { flash } from "@/lib/flash";
 import { parseAmountToSen } from "@/lib/money";
 import { isValidISODate } from "@/lib/dates";
 import { isUuid, str, type FormState } from "@/lib/validation";
@@ -54,6 +55,7 @@ export async function createGoal(_: FormState, formData: FormData): Promise<Form
   if (error || !data) return { error: error ? dbErrorMessage(error, t, "createGoal") : t.common.genericError };
   const linkError = await saveGoalAccounts(supabase, data.id, accountIds);
   if (linkError) return { error: dbErrorMessage(linkError, t, "createGoal") };
+  await flash("goalCreated");
 
   revalidatePath("/", "layout");
   redirect("/goals");
@@ -70,6 +72,7 @@ export async function updateGoal(id: string, _: FormState, formData: FormData): 
   if (error) return { error: dbErrorMessage(error, t, "updateGoal") };
   const linkError = await saveGoalAccounts(supabase, id, accountIds);
   if (linkError) return { error: dbErrorMessage(linkError, t, "updateGoal") };
+  await flash("goalUpdated");
 
   revalidatePath("/", "layout");
   redirect("/goals");
@@ -78,7 +81,8 @@ export async function updateGoal(id: string, _: FormState, formData: FormData): 
 export async function deleteGoal(id: string) {
   if (!isUuid(id)) return;
   const { supabase } = await requireUser();
-  await supabase.from("goals").delete().eq("id", id);
+  const { error } = await supabase.from("goals").delete().eq("id", id);
+  if (!error) await flash("goalDeleted");
   revalidatePath("/", "layout");
   redirect("/goals");
 }

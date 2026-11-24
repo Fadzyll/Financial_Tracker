@@ -9,10 +9,12 @@ export function AccountFilter({
   accounts,
   month,
   value,
+  q,
 }: {
   accounts: AccountWithBalance[];
   month: string;
   value?: string;
+  q?: string;
 }) {
   const { t } = useI18n();
   const router = useRouter();
@@ -23,6 +25,7 @@ export function AccountFilter({
       onChange={(e) => {
         const params = new URLSearchParams({ month });
         if (e.target.value) params.set("account", e.target.value);
+        if (q) params.set("q", q);
         router.push(`/transactions?${params}`);
       }}
     >

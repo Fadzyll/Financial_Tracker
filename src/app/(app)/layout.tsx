@@ -4,6 +4,7 @@ import { BottomNav, SidebarNav } from "@/components/nav";
 import { LanguageToggle } from "@/components/language-toggle";
 import { MobileUserMenu } from "@/components/user-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Toaster } from "@/components/toaster";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 
@@ -46,6 +47,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
 
       <BottomNav />
+      <Toaster />
     </div>
   );
 }

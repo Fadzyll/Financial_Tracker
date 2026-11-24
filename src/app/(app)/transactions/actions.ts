@@ -5,10 +5,12 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { dbErrorMessage } from "@/lib/db-errors";
+import { flash } from "@/lib/flash";
 import { parseAmountToSen } from "@/lib/money";
 import { isValidISODate } from "@/lib/dates";
 import type { TransactionKind } from "@/lib/types";
 import { isUuid, str, type FormState } from "@/lib/validation";
+import { safeNextPath } from "@/lib/next-path";
 
 const KINDS: TransactionKind[] = ["income", "expense", "transfer", "adjustment"];
 
@@ -70,9 +72,9 @@ export async function createTransaction(_: FormState, formData: FormData): Promi
   const { error } = await supabase.from("transactions").insert(values);
   if (error) return { error: dbErrorMessage(error, t, "createTransaction") };
   revalidatePath("/", "layout");
-
-  const next = str(formData, "next");
-  redirect(next.startsWith("/accounts/") && isUuid(next.slice(10)) ? next : "/transactions");
+  const next = safeNextPath(str(formData, "next"));
+  await flash("txCreated", { href: `/transactions/new?from=${encodeURIComponent(next)}` });
+  redirect(next);
 }
 
 export async function updateTransaction(id: string, _: FormState, formData: FormData): Promise<FormState> {
@@ -88,13 +90,15 @@ export async function updateTransaction(id: string, _: FormState, formData: Form
   const { error } = await supabase.from("transactions").update(values).eq("id", id);
   if (error) return { error: dbErrorMessage(error, t, "updateTransaction") };
   revalidatePath("/", "layout");
-  redirect("/transactions");
+  await flash("txUpdated");
+  redirect(safeNextPath(str(formData, "next")));
 }
 
-export async function deleteTransaction(id: string) {
+export async function deleteTransaction(id: string, next?: string) {
   if (!isUuid(id)) return;
   const { supabase } = await requireUser();
-  await supabase.from("transactions").delete().eq("id", id);
+  const { error } = await supabase.from("transactions").delete().eq("id", id);
+  if (!error) await flash("txDeleted");
   revalidatePath("/", "layout");
-  redirect("/transactions");
+  redirect(safeNextPath(next));
 }

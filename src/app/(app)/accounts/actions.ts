@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { dbErrorMessage } from "@/lib/db-errors";
+import { flash } from "@/lib/flash";
 import { parseAmountToSen } from "@/lib/money";
 import { todayISO } from "@/lib/dates";
 import { ACCOUNT_TYPES, type AccountType } from "@/lib/types";
@@ -43,6 +44,7 @@ export async function createAccount(_: FormState, formData: FormData): Promise<F
 
   const { error } = await supabase.from("accounts").insert(values);
   if (error) return { error: dbErrorMessage(error, t, "createAccount") };
+  await flash("accountCreated");
   refresh();
   redirect("/accounts");
 }
@@ -56,6 +58,7 @@ export async function updateAccount(id: string, _: FormState, formData: FormData
 
   const { error } = await supabase.from("accounts").update(values).eq("id", id);
   if (error) return { error: dbErrorMessage(error, t, "updateAccount") };
+  await flash("accountUpdated");
   refresh();
   redirect(`/accounts/${id}`);
 }
@@ -63,14 +66,16 @@ export async function updateAccount(id: string, _: FormState, formData: FormData
 export async function setAccountArchived(id: string, archived: boolean) {
   if (!isUuid(id)) return;
   const { supabase } = await requireUser();
-  await supabase.from("accounts").update({ archived }).eq("id", id);
+  const { error } = await supabase.from("accounts").update({ archived }).eq("id", id);
+  if (!error) await flash(archived ? "accountArchived" : "accountRestored");
   refresh();
 }
 
 export async function deleteAccount(id: string) {
   if (!isUuid(id)) return;
   const { supabase } = await requireUser();
-  await supabase.from("accounts").delete().eq("id", id);
+  const { error } = await supabase.from("accounts").delete().eq("id", id);
+  if (!error) await flash("accountDeleted");
   refresh();
   redirect("/accounts");
 }
@@ -104,6 +109,7 @@ export async function updateAccountValue(id: string, _: FormState, formData: For
     note: str(formData, "note", 200) || null,
   });
   if (error) return { error: dbErrorMessage(error, t, "updateAccountValue") };
+  await flash("valueUpdated");
   refresh();
   redirect(`/accounts/${id}`);
 }

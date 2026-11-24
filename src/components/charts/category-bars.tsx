@@ -11,7 +11,9 @@ export function CategoryBars({
   total,
   t,
   locale,
+  period,
 }: {
+  period: string;
   rows: { label: string; amount: number }[];
   total: number;
   t: Dictionary;
@@ -19,7 +21,7 @@ export function CategoryBars({
 }) {
   const max = Math.max(...rows.map((r) => r.amount), 1);
   return (
-    <ChartCard title={t.charts.spendTitle} subtitle={t.charts.spendSub}>
+    <ChartCard title={t.charts.spendTitle} subtitle={period}>
       {rows.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">{t.charts.spendEmpty}</p>
       ) : (

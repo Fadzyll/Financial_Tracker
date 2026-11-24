@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
 import { AccountIcon } from "@/components/account-icon";
 import { GoalCard } from "@/components/goal-card";
 import { TransactionList } from "@/components/transaction-list";
-import { ButtonLink, Card } from "@/components/ui";
+import { Card } from "@/components/ui";
 import { CategoryBars } from "@/components/charts/category-bars";
+import { RangeFilter } from "@/components/charts/range-filter";
+import { GettingStarted } from "@/components/getting-started";
 import { MonthlyFlowChart } from "@/components/charts/monthly-flow-chart";
 import { SavingsTrendChart } from "@/components/charts/savings-trend-chart";
 import { monthlyFlow, monthsBack, savingsTrend, spendingByCategory } from "@/lib/charts";
@@ -17,7 +18,13 @@ import { formatMoney } from "@/lib/money";
 import { requireUser } from "@/lib/supabase/server";
 import { ACCOUNT_TYPES } from "@/lib/types";
 
-export default async function DashboardPage() {
+const RANGES = { "3m": 3, "6m": 6, "1y": 12 } as const;
+type Range = keyof typeof RANGES;
+
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ range?: string }> }) {
+  const rangeParam = (await searchParams).range;
+  const range: Range = rangeParam && rangeParam in RANGES ? (rangeParam as Range) : "6m";
+  const rangeMonths = RANGES[range];
   const { t, locale } = await getI18n();
   const { supabase, userId } = await requireUser();
   const month = currentMonth();
@@ -37,9 +44,14 @@ export default async function DashboardPage() {
   const { income, expense, net } = summarize(monthTxns);
 
   // Charts
-  const flow = monthlyFlow(history, monthsBack(month, 6));
-  const trend = savingsTrend(accounts, history, monthsBack(month, 12));
-  const spend = spendingByCategory(monthTxns, 5);
+  const periodMonths = monthsBack(month, rangeMonths);
+  const period = fmt(t.charts.lastMonths, { n: rangeMonths });
+  const flow = monthlyFlow(history, periodMonths);
+  const trend = savingsTrend(accounts, history, periodMonths);
+  const spend = spendingByCategory(
+    history.filter((tx) => tx.occurred_on >= `${periodMonths[0]}-01`),
+    5,
+  );
   const categoryById = new Map(categories.map((c) => [c.id, c]));
   const spendRows = [
     ...spend.shown.map((c) => ({
@@ -72,14 +84,9 @@ export default async function DashboardPage() {
         </p>
       </section>
 
-      {accounts.length === 0 ? (
-        <Card className="text-center">
-          <p className="text-sm text-muted">{t.dashboard.getStarted}</p>
-          <ButtonLink href="/accounts/new" className="mt-4">
-            <Plus className="size-4" /> {t.accounts.add}
-          </ButtonLink>
-        </Card>
-      ) : (
+      <GettingStarted done={[accounts.length > 0, history.length > 0, goals.length > 0]} />
+
+      {accounts.length === 0 ? null : (
         <>
           {/* This month */}
           <section>
@@ -87,31 +94,37 @@ export default async function DashboardPage() {
               {t.dashboard.thisMonth} · {formatMonth(month, locale)}
             </h2>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <Card className="p-3 sm:p-4">
+              <Link href={`/transactions?month=${month}`} className="rounded-2xl border border-border bg-surface p-3 transition-colors hover:bg-surface-2 sm:p-4">
                 <p className="text-xs text-muted">{t.dashboard.moneyIn}</p>
                 <p className="tabular mt-1 text-sm font-semibold text-income sm:text-lg">
                   {formatMoney(income, locale)}
                 </p>
-              </Card>
-              <Card className="p-3 sm:p-4">
+              </Link>
+              <Link href={`/transactions?month=${month}`} className="rounded-2xl border border-border bg-surface p-3 transition-colors hover:bg-surface-2 sm:p-4">
                 <p className="text-xs text-muted">{t.dashboard.moneyOut}</p>
                 <p className="tabular mt-1 text-sm font-semibold text-expense sm:text-lg">
                   {formatMoney(expense, locale)}
                 </p>
-              </Card>
-              <Card className="p-3 sm:p-4">
+              </Link>
+              <Link href={`/transactions?month=${month}`} className="rounded-2xl border border-border bg-surface p-3 transition-colors hover:bg-surface-2 sm:p-4">
                 <p className="text-xs text-muted">{t.dashboard.net}</p>
                 <p className="tabular mt-1 text-sm font-semibold sm:text-lg">
                   {formatMoney(net, locale, { signed: true })}
                 </p>
-              </Card>
+              </Link>
             </div>
           </section>
 
-          {/* Charts */}
-          <MonthlyFlowChart data={flow} />
-          <SavingsTrendChart points={trend} />
-          <CategoryBars rows={spendRows} total={spend.total} t={t} locale={locale} />
+          {/* Charts — one period filter for all of them */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold text-muted">{t.charts.insights}</h2>
+              <RangeFilter value={range} labels={t.charts.range} />
+            </div>
+            <MonthlyFlowChart data={flow} period={period} />
+            <SavingsTrendChart points={trend} period={period} />
+            <CategoryBars rows={spendRows} total={spend.total} t={t} locale={locale} period={period} />
+          </section>
 
           {/* Savings by type + accounts */}
           <section>
@@ -190,6 +203,7 @@ export default async function DashboardPage() {
               </Link>
             </div>
             <TransactionList
+              from={"/dashboard"}
               transactions={recent}
               accounts={allAccounts}
               categories={categories}

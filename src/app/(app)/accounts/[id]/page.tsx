@@ -66,6 +66,7 @@ export default async function AccountPage({ params }: { params: Promise<{ id: st
 
       <h2 className="mb-3 text-lg font-semibold">{t.accounts.history}</h2>
       <TransactionList
+              from={`/accounts/${id}`}
         transactions={transactions}
         accounts={accounts}
         categories={categories}

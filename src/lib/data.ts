@@ -43,10 +43,19 @@ export async function getGoals() {
   return (data ?? []) as Goal[];
 }
 
+/** Make free text safe to embed in a PostgREST filter. */
+export function cleanSearch(q: unknown) {
+  return typeof q === "string" ? q.replace(/[%_,()*\\:"'.]/g, " ").replace(/\s+/g, " ").trim().slice(0, 50) : "";
+}
+
 export async function getTransactions(opts: {
   month?: string;
   accountId?: string;
   limit?: number;
+  /** Already cleaned with cleanSearch() */
+  search?: string;
+  /** Categories whose name matches the search */
+  searchCategoryIds?: string[];
 }) {
   const { supabase } = await requireUser();
   let query = supabase
@@ -60,6 +69,12 @@ export async function getTransactions(opts: {
   }
   if (opts.accountId && isUuid(opts.accountId)) {
     query = query.or(`account_id.eq.${opts.accountId},to_account_id.eq.${opts.accountId}`);
+  }
+  if (opts.search) {
+    const ids = (opts.searchCategoryIds ?? []).filter(isUuid);
+    query = ids.length
+      ? query.or(`note.ilike.%${opts.search}%,category_id.in.(${ids.join(",")})`)
+      : query.ilike("note", `%${opts.search}%`);
   }
   if (opts.limit) query = query.limit(opts.limit);
   const { data, error } = await query;

@@ -11,14 +11,14 @@ const H = 220;
 const M = { top: 10, right: 12, bottom: 26, left: 56 };
 
 /** Area + 2px line of month-end total savings, with a snapping crosshair. */
-export function SavingsTrendChart({ points }: { points: SavingsPoint[] }) {
+export function SavingsTrendChart({ points, period }: { points: SavingsPoint[]; period: string }) {
   const { t, locale } = useI18n();
   const { ref, width } = useWidth<HTMLDivElement>();
   const [active, setActive] = useState<number | null>(null);
 
   if (points.length < 2) {
     return (
-      <ChartCard title={t.charts.trendTitle} subtitle={t.charts.trendSub}>
+      <ChartCard title={t.charts.trendTitle} subtitle={`${t.charts.trendSub} · ${period}`}>
         <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted">{t.charts.trendEmpty}</p>
       </ChartCard>
     );
@@ -44,7 +44,7 @@ export function SavingsTrendChart({ points }: { points: SavingsPoint[] }) {
   const ap = active !== null ? points[active] : null;
 
   return (
-    <ChartCard title={t.charts.trendTitle} subtitle={t.charts.trendSub}>
+    <ChartCard title={t.charts.trendTitle} subtitle={`${t.charts.trendSub} · ${period}`}>
       <div ref={ref} className="relative" onPointerLeave={() => setActive(null)}>
         {width > 0 && (
           <svg

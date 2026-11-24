@@ -11,7 +11,7 @@ const H = 220;
 const M = { top: 8, right: 4, bottom: 26, left: 56 };
 
 /** Grouped bars: money in vs money out per month. */
-export function MonthlyFlowChart({ data }: { data: MonthFlow[] }) {
+export function MonthlyFlowChart({ data, period }: { data: MonthFlow[]; period: string }) {
   const { t, locale } = useI18n();
   const { ref, width } = useWidth<HTMLDivElement>();
   const [active, setActive] = useState<number | null>(null);
@@ -34,12 +34,12 @@ export function MonthlyFlowChart({ data }: { data: MonthFlow[] }) {
   return (
     <ChartCard
       title={t.charts.flowTitle}
-      subtitle={t.charts.flowSub}
+      subtitle={period}
       legend={series.map((s) => <LegendItem key={s.key} color={s.color} label={s.label} />)}
     >
       <div ref={ref} className="relative" onPointerLeave={() => setActive(null)}>
         {width > 0 && (
-          <svg width={width} height={H} role="img" aria-label={`${t.charts.flowTitle}, ${t.charts.flowSub}`}>
+          <svg width={width} height={H} role="img" aria-label={`${t.charts.flowTitle}, ${period}`}>
             {ticks.map((v) => (
               <g key={v}>
                 <line x1={M.left} x2={width - M.right} y1={y(v)} y2={y(v)} stroke={v === 0 ? "var(--axis)" : "var(--grid)"} />
@@ -68,9 +68,11 @@ export function MonthlyFlowChart({ data }: { data: MonthFlow[] }) {
                       />
                     );
                   })}
-                  <text x={cx} y={H - 8} textAnchor="middle" className="fill-muted text-[11px]">
-                    {formatMonthShort(d.month, locale)}
-                  </text>
+                  {(groupW >= 34 || i % 2 === (data.length - 1) % 2) && (
+                    <text x={cx} y={H - 8} textAnchor="middle" className="fill-muted text-[11px]">
+                      {formatMonthShort(d.month, locale)}
+                    </text>
+                  )}
                   {/* Hit target: the whole month column, bigger than the bars */}
                   <rect
                     x={cx - groupW / 2}
