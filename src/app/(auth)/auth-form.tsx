@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { Card, Field, FormError, Input, SubmitButton } from "@/components/ui";
+import { Card, Field, FormError, Input, PasswordInput, SubmitButton } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/client";
 import { login, signup, type AuthState } from "./actions";
 
@@ -45,10 +45,9 @@ export function AuthForm({ mode, notice }: { mode: "login" | "signup"; notice?: 
           htmlFor="password"
           hint={mode === "signup" ? t.auth.passwordHint : undefined}
         >
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             minLength={mode === "signup" ? 8 : undefined}
             required

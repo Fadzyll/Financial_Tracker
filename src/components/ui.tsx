@@ -2,7 +2,9 @@
 
 import clsx from "clsx";
 import Link from "next/link";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useI18n } from "@/lib/i18n/client";
 import { buttonClass, type Variant } from "./button-class";
 
@@ -63,6 +65,28 @@ const fieldClass =
 
 export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input className={clsx(fieldClass, className)} {...props} />;
+}
+
+/** Password field with an eye button to show or hide what was typed. */
+export function PasswordInput({ className, ...props }: Omit<React.InputHTMLAttributes<HTMLInputElement>, "type">) {
+  const { t } = useI18n();
+  const [visible, setVisible] = useState(false);
+  const Icon = visible ? EyeOff : Eye;
+  return (
+    <div className="relative">
+      <input type={visible ? "text" : "password"} className={clsx(fieldClass, "pr-12", className)} {...props} />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        aria-label={visible ? t.auth.hidePassword : t.auth.showPassword}
+        aria-pressed={visible}
+        title={visible ? t.auth.hidePassword : t.auth.showPassword}
+        className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-xl text-muted hover:text-text focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand"
+      >
+        <Icon className="size-5" />
+      </button>
+    </div>
+  );
 }
 
 export function Select({ className, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
