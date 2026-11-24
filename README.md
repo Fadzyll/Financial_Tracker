@@ -36,6 +36,14 @@ Money is stored as whole sen (`bigint`) to avoid rounding errors.
    `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email` so confirmation links
    work even when opened on a different device from the one used to sign up.
 
+### Email templates (recommended)
+Set up custom SMTP in Supabase (**Authentication → Emails → SMTP Settings**), then paste:
+- `supabase/templates/confirm-signup.html` into **Confirm sign up**
+- `supabase/templates/reset-password.html` into **Reset password**
+
+Their links use `token_hash`, so they work on any device. In **Authentication → URL
+Configuration**, add `https://<your-domain>/**` to **Redirect URLs**.
+
 ### 2. Run locally
 ```bash
 cp .env.example .env.local   # fill in URL + anon/publishable key from Project Settings → API
@@ -50,6 +58,19 @@ printed API URL and publishable key in `.env.local`. Local sign-ups don't need e
 ### 3. Deploy
 Deploy to [Vercel](https://vercel.com) (import the repo, add the two `NEXT_PUBLIC_SUPABASE_*`
 environment variables). HTTPS is required for the PWA install prompt.
+
+## Tests
+
+```bash
+npm run test:unit          # chart maths, money parsing, safe redirects
+npx supabase start         # local database (Docker), applies migrations
+npm run build
+SUPABASE_SECRET_KEY=<SECRET_KEY from `npx supabase status`> npm run test:e2e
+```
+
+The same checks run on GitHub for every push and pull request
+(`.github/workflows/ci.yml`): typecheck, unit tests, build, then the browser
+tests against a fresh local Supabase.
 
 ## Project layout
 

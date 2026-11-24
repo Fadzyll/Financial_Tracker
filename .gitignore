@@ -10,3 +10,8 @@ next-env.d.ts
 npm-debug.log*
 .vercel
 supabase/.temp/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
