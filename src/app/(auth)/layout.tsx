@@ -1,12 +1,14 @@
 import Image from "next/image";
 import { LanguageToggle } from "@/components/language-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const { t } = await getI18n();
   return (
     <div className="flex min-h-dvh flex-col px-4 py-6">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <ThemeToggle />
         <LanguageToggle />
       </div>
       <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-8">

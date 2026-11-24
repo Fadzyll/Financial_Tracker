@@ -53,6 +53,7 @@ const en = {
     retry: "Try again",
     confirmDelete: "Delete this permanently? This cannot be undone.",
     language: "Language",
+    toggleTheme: "Switch light / dark mode",
     offline: "You're offline. Connect to the internet to see your latest data.",
   },
   accountTypes: {
@@ -237,6 +238,7 @@ const ms: Dictionary = {
     retry: "Cuba lagi",
     confirmDelete: "Padam terus? Tindakan ini tidak boleh dibatalkan.",
     language: "Bahasa",
+    toggleTheme: "Tukar mod cerah / gelap",
     offline: "Anda di luar talian. Sambung ke internet untuk lihat data terkini.",
   },
   accountTypes: {
