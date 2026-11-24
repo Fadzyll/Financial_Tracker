@@ -8,6 +8,8 @@
   <title>KiraDuit</title>
 </head>
 <body style="margin:0;padding:0;background-color:#eef2f0;">
+  <!-- The logo uses a fixed full URL (not {{ .SiteURL }}) so it also shows in
+       Supabase's template preview. If you move to a custom domain, update it. -->
   <!-- Preheader (shown in the inbox preview, hidden in the email) -->
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#eef2f0;">
     Sahkan e-mel anda untuk mula guna KiraDuit · Confirm your email to start using KiraDuit
@@ -24,7 +26,7 @@
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="padding-right:10px;vertical-align:middle;">
-                    <img src="{{ .SiteURL }}/icons/icon-192.png" width="40" height="40" alt="" style="display:block;border:0;border-radius:10px;">
+                    <img src="https://financial-tracker-blush-nu.vercel.app/email/kiraduit-logo.png" width="40" height="40" alt="KiraDuit" style="display:block;border:0;border-radius:10px;">
                   </td>
                   <td style="vertical-align:middle;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;font-weight:800;color:#065f46;letter-spacing:-0.3px;">
                     KiraDuit
