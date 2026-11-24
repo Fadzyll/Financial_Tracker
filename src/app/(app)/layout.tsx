@@ -1,14 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Settings } from "lucide-react";
 import { BottomNav, SidebarNav } from "@/components/nav";
 import { LanguageToggle } from "@/components/language-toggle";
+import { MobileUserMenu, SidebarAccount } from "@/components/user-menu";
 import { requireUser } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  await requireUser();
+  const { supabase, userId, email } = await requireUser();
   const { t } = await getI18n();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", userId)
+    .maybeSingle();
+  const name = profile?.display_name ?? "";
 
   return (
     <div className="min-h-dvh md:flex">
@@ -18,8 +24,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {t.appName}
         </Link>
         <SidebarNav />
-        <div className="mt-auto px-2">
-          <LanguageToggle />
+        <div className="mt-auto space-y-3">
+          <div className="flex items-center justify-between px-2">
+            <span className="text-xs font-medium text-muted">{t.common.language}</span>
+            <LanguageToggle />
+          </div>
+          <SidebarAccount name={name} email={email} />
         </div>
       </aside>
 
@@ -30,13 +40,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             {t.appName}
           </Link>
           <LanguageToggle />
-          <Link
-            href="/settings"
-            aria-label={t.nav.settings}
-            className="inline-flex size-10 items-center justify-center rounded-full text-muted hover:bg-surface-2 hover:text-text"
-          >
-            <Settings className="size-5" />
-          </Link>
+          <MobileUserMenu name={name} email={email} />
         </header>
         <main className="mx-auto w-full max-w-3xl px-4 pt-5 pb-28 md:px-8 md:pt-8 md:pb-12">{children}</main>
       </div>

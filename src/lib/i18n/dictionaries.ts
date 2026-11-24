@@ -176,6 +176,12 @@ const en = {
     expense: "Expense",
     exportCsv: "Download transactions (CSV)",
     privacy: "Your data is only visible to you. No account numbers are stored.",
+    profileHint: "The name shown on your dashboard.",
+    languageHint: "Choose the app language.",
+    categoriesHint: "Used to group your money in and money out. Removing one keeps its transactions.",
+    yourData: "Your data",
+    yourDataHint: "Download a copy of all your transactions to open in Excel or Google Sheets.",
+    loggedInAs: "Logged in as",
   },
 };
 
@@ -354,6 +360,12 @@ const ms: Dictionary = {
     expense: "Perbelanjaan",
     exportCsv: "Muat turun transaksi (CSV)",
     privacy: "Data anda hanya boleh dilihat oleh anda. Tiada nombor akaun disimpan.",
+    profileHint: "Nama yang dipaparkan di halaman utama.",
+    languageHint: "Pilih bahasa aplikasi.",
+    categoriesHint: "Untuk mengumpul duit masuk dan keluar. Membuang kategori tidak memadam transaksinya.",
+    yourData: "Data anda",
+    yourDataHint: "Muat turun salinan semua transaksi untuk dibuka di Excel atau Google Sheets.",
+    loggedInAs: "Log masuk sebagai",
   },
 };
 
